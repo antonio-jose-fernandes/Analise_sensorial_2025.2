@@ -48,8 +48,8 @@ def nova_analise():
         responsavel_id = request.form['responsavel']
         data = request.form['data']
         status = request.form['status']
-        teste = request.form['teste']
-        quantidade_amostras = request.form['quantidade_amostras']
+        teste = "" #request.form['teste']
+        quantidade_amostras = 0 #request.form['quantidade_amostras']
         quantidade_avaliadores = request.form['quantidade_avaliadores']
         justificativa = request.form['justificativa']
 
