@@ -55,7 +55,7 @@ def aluno():
 def aluno_dashboard():
    # return redirect(url_for('dashboard'))    
     db = SessionLocal()
-    try:
+    try:        
         analises = (
             db.query(Analise)
             .join(Analise.amostras)
@@ -91,11 +91,12 @@ def aluno_dashboard():
             }
 
      
-    
-        return render_template("/usuario_aluno/dashboard.html", analises=analises, medias_avaliacores=medias_avaliacores )
-       # return render_template("/usuario_aluno/dashboard_atualizado.html", analises=analises, medias_avaliacores=medias_avaliacores)
+      
+        return render_template("usuario_aluno/dashboard.html", analises=analises, medias_avaliacores=medias_avaliacores )
+       # return render_template("/usuario_aluno/dashboard_atualizado.html", analises=analises, medias_avaliacores=medias_avaliacores)    
     finally:
         db.close()
+       
 
 
 # Rota simples para tela de análise do aluno
