@@ -1,0 +1,109 @@
+{% extends '/usuario_aluno/menu_user_aluno.html'%}
+{% block content %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content ="width=device-width , initial-scale=1.0">
+    <title>Dashboard - Análise Sensorial</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;  
+        }
+        header{
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        .container{
+            display: grid;
+            grid-template : repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .card{
+            background-color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2{
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+        canvas{
+            width:100% !important;
+            height: auto !important;
+        }
+    </style>
+    <link rel="icon" href="../static/assets/icon/logo.ico" type="image/x-icon">
+</head>
+<body>
+    <header>Dashboard de Análise Sensorial</header>
+
+    <div class="container">
+      <div class="card">
+        <h2>Resumo dos Testes</h2>
+        <ul>
+            <li> Testes realizados: {{total_testes}}</li>
+            <li>Amostras avaliadas: {{total_amostras}}</li>
+            <li>Painelistas: {{total_painelistas}}</li>
+        </ul>
+      </div>
+    
+    {% for atributo, valores in medias.items() %}  
+      <div class="card">
+        <h2>{{ atributo|capitalize }}</h2>
+        <canvas id="grafico_{{ atributo }}"></canvas>
+       </div>
+    {% endfor %}
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script>
+    // converter os dados do flask para obejtos javascript. as medias contem as medias dosatributos por amostra
+    const medias = {{ medias | tojson | safe }};
+    const coresSignificancia = {{ significancia | tojson | safe }};
+    // para cada atriburo ele busca um canvas correspondente
+    Object.keys(medias).forEach(attr => {
+        const ctx = document.getElementById(`grafico_${attr}`).getContext("2d");
+        const labels = Object.keys(medias[attr]); //ids das amostras
+        const valores = Object.values(medias[attr]); //as medias das avaliacoes
+        const cores = coresSignificancia[attr]; //cores pra significancia estatistica
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `Média - ${attr}`,
+                    data: valores,
+                    backgroundColor: cores
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 9
+                    }  //baseando na escala hedonica de av de 1 a 9
+                }
+            }
+        });
+    });
+</script>    
+</body>
+</html>
+{% endblock %}
+
+
+

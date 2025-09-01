@@ -1,0 +1,108 @@
+{% extends '/usuario_aluno/menu_user_aluno.html' %}
+
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Análise Sensorial</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .card {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+  </style>
+<link rel="icon" href="../static/assets/icon/logo.ico" type="image/x-icon">
+     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Dashboard de Análise Sensorial </h1>
+  </header>
+   
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+   {% for analise in analises %}
+
+       <div class="container" style="width: 100%;"> 
+    <table class="table" >
+        <thead>
+            <tr>
+          <th colspan="2" scope="col">Dados da análise:{{ analise.produto }}</th>    
+        </tr>
+        
+      </thead>
+        <tbody>
+          <tr>
+            <td>
+          <div class="card">
+            <ul>
+              <li>Status:{{ analise.status }}</li>
+              <li>Testes realizados: 12</li>
+            </ul>
+          </div>
+        </td>
+        <!--aqui um grafico para cada amostra-->
+        
+            {% for amostra in analise.amostras %}
+            <td>
+             <div class="card"  >
+                <h2>Amostra {{amostra.descricao}}</h2>
+                  <div id="chat{{amostra.id}}" ></div>
+              </div>
+              </td>
+
+            
+              
+            {% endfor %}
+      
+        </tr>
+        </tbody>
+      </table>
+       
+       </div>
+
+   
+
+
+{% endfor %}
+
+</body>
+</html>
+
+
+{% endblock %}

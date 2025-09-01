@@ -1,0 +1,99 @@
+<?php
+// Conectar ao banco (ajuste com suas credenciais)
+$conn = new mysqli("localhost", "usuario", "senha", "banco");
+
+session_start();
+$aluno_id = $_SESSION['aluno_id']; // Supondo que o aluno está logado
+
+// Buscar análises ativas
+$sql = "SELECT * FROM analises WHERE ativa = 1 AND aluno_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $aluno_id);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <title>Minhas Análises Ativas</title>
+  <style>
+    .wrapper {
+      overflow-x: hidden;
+    }
+    .main-content {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    .container-fluid {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    .table-responsive.custom-table {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .table-responsive.custom-table table {
+      width: 100%;
+      max-width: 100%;
+      table-layout: fixed;
+    }
+    .table-responsive.custom-table th,
+    .table-responsive.custom-table td {
+      white-space: normal !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .table-responsive.custom-table .actions {
+      min-width: 80px;
+    }
+    @media (min-width: 768px) {
+      .table-responsive.custom-table table {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+    }
+    @media (max-width: 767px) {
+      .table-responsive.custom-table th,
+      .table-responsive.custom-table td {
+        white-space: nowrap;
+        font-size: 0.75rem;
+      }
+      .table-responsive.custom-table .btn-sm {
+        padding: 0.1rem 0.3rem;
+        font-size: 0.65rem;
+      }
+      .table-responsive.custom-table .btn i {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+<link rel="icon" href="../static/assets/icon/logo.ico" type="image/x-icon">
+</head>
+<body>
+  {% include 'includes/menu_lateral.html' %}
+
+  <div class="main-content">
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-expanded="false" aria-controls="sidebar">
+      <i class="fa-solid fa-bars"></i>
+      <span class="sr-only">Abrir/fechar menu</span>
+    </button>
+
+  <h1>Análises Ativas</h1>
+
+  <?php while ($row = $result->fetch_assoc()): ?>
+    <div class="analise">
+      <h3><?= htmlspecialchars($row['titulo']) ?></h3>
+      <p><?= htmlspecialchars($row['descricao']) ?></p>
+    </div>
+  <?php endwhile; ?>
+
+  <a href="analise_controller.php" class="botao">+ Realizar Nova Análise</a>
+
+</body>
+</html>

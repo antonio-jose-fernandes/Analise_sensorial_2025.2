@@ -1,0 +1,158 @@
+{% extends '/usuario_aluno/menu_user_aluno.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Análise Sensorial</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .card {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+<link rel="icon" href="../static/assets/icon/logo.ico" type="image/x-icon">
+</head>
+<body>
+  <header>
+    <h1>Dashboard de Análise Sensorial</h1>
+  </header>
+
+  <div class="container" style="width: 100%;">
+    <table class="table" >
+       <thead>
+    <tr>
+      <th scope="col">Dados da análise:</th>     
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+    <div class="card">
+      <h2>Resumo dos Testes</h2>
+      <ul>
+        <li>Testes realizados: 12</li>
+        <li>Amostras avaliadas: 5</li>
+        <li>Painelistas: 30</li>
+        <li>Tipo: Hedônico</li>
+      </ul>
+    </div>
+   </td><td>
+    <div class="card">
+      <h2>Amostra A</h2>
+      <canvas id="barChart"></canvas>
+    </div>
+</td><td>
+    <div class="card">
+      <h2>Amostra B</h2>
+      <canvas id="barChart2"></canvas>
+    </div>
+  </div>
+  </td>
+     <td>
+     <div class="card">
+       <h2>Média Amostras A + B</h2>
+         <canvas id="barChartMedia"></canvas>
+    </div>
+ </td>
+  </tr>
+   </tbody>
+</table>
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+ <script>
+   
+    // Bar Chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Sabor', 'Aparência', 'Textura', 'Aroma'],
+        datasets: [
+          {
+            label: 'Nota Média',
+            data: [8.1, 7.3, 6.5, 5.8],
+            backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#111']
+          }
+        ]
+      }
+    });
+
+     // Bar Chart
+    const barCtx2 = document.getElementById('barChart2').getContext('2d');
+    new Chart(barCtx2, {
+      type: 'bar',
+      data: {
+        labels: ['Sabor', 'Aparência', 'Textura', 'Aroma'],
+        datasets: [
+          {
+            label: 'Nota Média',
+            data: [8.1, 7.3, 6.5, 5.8],
+            backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#111']
+          }
+        ]
+      }
+    });
+    
+   // Bar Chart
+    const dadosA = [8.1, 7.3, 6.5, 5.8];
+    const dadosB = [7.5, 6.8, 7.0, 6.2]; 
+     const mediaAB = dadosA.map((valor, index) => {
+     return ((valor + dadosB[index]) / 2).toFixed(2);
+  });
+
+     const barCtxMedia = document.getElementById('barChartMedia').getContext('2d');
+  new Chart(barCtxMedia, {
+    type: 'bar',
+    data: {
+      labels: ['Sabor', 'Aparência', 'Textura', 'Aroma'],
+      datasets: [
+        {
+          label: 'Média das Amostras A e B',
+          data: mediaAB,
+          backgroundColor: ['#2196F3', '#9C27B0', '#FF9800', '#009688']
+        }
+      ]
+    }
+  });
+  </script>
+</body>
+</html>
+
+
+{% endblock %}

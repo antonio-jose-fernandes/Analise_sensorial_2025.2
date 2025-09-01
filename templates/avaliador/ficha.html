@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha Sensorial</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --success-color: #28a745;
+      --secondary-color: #6c757d;
+      --light-gray: #f8f9fa;
+      --dark-gray: #343a40;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--light-gray);
+      padding: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .container {
+      background: #fff;
+      padding: 25px;
+      max-width: 900px;
+      margin: 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: var(--dark-gray);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 15px;
+      color: var(--dark-gray);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+
+    .rating-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    .rating-group input[type="radio"] {
+      display: none;
+    }
+
+    .rating-group label {
+      cursor: pointer;
+      margin-top: 0;
+      flex: 1;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .rating-group span {
+      display: block;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-weight: normal;
+    }
+
+    .rating-group input[type="radio"]:checked + span {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      font-size: 16px;
+      width: 100%;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #btn-proximo {
+      background-color: var(--success-color);
+    }
+
+    #btn-proximo:hover {
+      background-color: #218838;
+    }
+
+    #btn-voltar {
+      background-color: var(--secondary-color);
+    }
+
+    #btn-voltar:hover {
+      background-color: #5a6268;
+    }
+
+    #btn-finalizar {
+      background-color: var(--primary-color);
+    }
+
+    #btn-finalizar:hover {
+      background-color: #0069d9;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .step-container {
+      position: relative;
+      min-height: 500px;
+      overflow: hidden;
+    }
+
+    .form-step {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      transition: all 0.5s ease-in-out;
+      padding: 10px;
+    }
+
+    .form-step:not(.active) {
+      display: none;
+    }
+
+    .slide-in-right {
+      animation: slideInFromRight 0.5s ease-in-out forwards;
+    }
+
+    .slide-out-left {
+      animation: slideOutToLeft 0.5s ease-in-out forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInFromLeft 0.5s ease-in-out forwards;
+    }
+
+    .slide-out-right {
+      animation: slideOutToRight 0.5s ease-in-out forwards;
+    }
+
+    @keyframes slideInFromRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOutToLeft {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-100%); opacity: 0; }
+    }
+
+    @keyframes slideInFromLeft {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOutToRight {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+        margin: 10px auto;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      .rating-group label {
+        min-width: 35px;
+        font-size: 14px;
+      }
+
+      .rating-group span {
+        padding: 8px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+
+      .container {
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      select,
+      textarea {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .rating-group {
+        gap: 5px;
+      }
+
+      .rating-group label {
+        min-width: 30px;
+        font-size: 12px;
+      }
+
+      .rating-group span {
+        padding: 6px 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  {% include '/includes/modal_flash.html' %}
+  <div class="container">
+    <h1>Ficha de Avaliação Sensorial</h1>
+    <h2>{{ produto }}</h2>
+
+    <form id="formulario" method="post" action="{{ url_for('salvar_avaliacoes', id=id) }}">
+      <div class="step-container">
+
+        <!-- Etapa 1 -->
+        <div class="form-step active" id="step-0">
+          <h2>Dados do Avaliador</h2>
+          <label>Nome Completo *</label>
+          <input type="text" name="nome" required>
+
+          <label>Email *</label>
+          <input type="email" name="email" required>
+
+          <label>Gênero *</label>
+          <select name="genero" required>
+            <option value="">Selecione</option>
+            <option>Feminino</option>
+            <option>Masculino</option>
+            <option>Outro</option>
+          </select>
+
+          <label>Faixa Etária *</label>
+          <select name="faixa_etaria" required>
+            <option value="">Selecione</option>
+            <option>18 - 24 anos</option>
+            <option>25 - 34 anos</option>
+            <option>35 - 45 anos</option>
+            <option>Acima de 45 anos</option>
+          </select>
+        </div>
+
+        <!-- Etapas dinâmicas das amostras -->
+        {% for i in range(1, quantidade_amostras + 1) %}
+        <div class="form-step" id="step-{{ i }}">
+          <h2>Amostra {{ i }}</h2>
+          <label>Nº da Amostra *</label>
+          <input type="text" name="amostra_{{ i }}" required>
+
+          {% set campos = ['Impressao Global', 'Cor', 'Aroma', 'Textura', 'Sabor'] %}
+          {% for campo in campos %}
+            <label>{{ campo }} *</label>
+            <div class="rating-group">
+              {% for n in range(1,10) %}
+              <label>
+                <input type="radio" name="{{ campo|lower|replace(' ', '_') }}_{{ i }}" value="{{ n }}" required>
+                <span>{{ n }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+          <label>Intenção de Compra *</label>
+          <select name="compra_{{ i }}" required>
+            <option value="">Selecione</option>
+            <option value="5">Certamente compraria</option>
+            <option value="4">Provavelmente compraria</option>
+            <option value="3">Tenho dúvidas se compraria</option>
+            <option value="2">Provavelmente não compraria</option>
+            <option value="1">Certamente não compraria</option>
+          </select>
+
+          <label>Observações</label>
+          <textarea name="obs_{{ i }}" rows="3"></textarea>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Botões -->
+      <div class="button-group">
+        <button type="button" id="btn-voltar" hidden>Voltar</button>
+        <button type="button" id="btn-proximo">Prosseguir</button>
+        <button type="submit" id="btn-finalizar" hidden>Enviar Avaliação</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let etapaAtual = 0;
+    const totalEtapas = {{ quantidade_amostras + 1 }};
+    const transitionTime = 500;
+
+    const btnProximo = document.getElementById("btn-proximo");
+    const btnVoltar = document.getElementById("btn-voltar");
+    const btnFinalizar = document.getElementById("btn-finalizar");
+
+    function ajustarAlturaContainer() {
+      const stepAtual = document.getElementById(`step-${etapaAtual}`);
+      const container = document.querySelector('.step-container');
+      if (stepAtual && container) {
+        container.style.minHeight = stepAtual.scrollHeight + 'px';
+      }
+    }
+
+    function trocarEtapa(proxima) {
+      const stepAtual = document.getElementById(`step-${etapaAtual}`);
+      const destinoIndex = etapaAtual + (proxima ? 1 : -1);
+      const stepDestino = document.getElementById(`step-${destinoIndex}`);
+
+      if (!stepDestino) return;
+
+      // Pré-ajusta a altura do container
+      const container = document.querySelector('.step-container');
+      container.style.minHeight = Math.max(stepAtual.scrollHeight, stepDestino.scrollHeight) + 'px';
+
+      // Mostra o step destino antes da animação
+      stepDestino.style.display = 'block';
+      
+      if (proxima) {
+        // Animação para PRÓXIMO:
+        // 1. Formulário atual sai pela esquerda
+        stepAtual.classList.add('slide-out-left');
+        // 2. Novo formulário entra pela direita
+        stepDestino.classList.add('slide-in-right');
+      } else {
+        // Animação para VOLTAR:
+        // 1. Formulário atual sai pela direita
+        stepAtual.classList.add('slide-out-right');
+        // 2. Formulário anterior entra pela esquerda
+        stepDestino.classList.add('slide-in-left');
+      }
+
+      setTimeout(() => {
+        // Limpa as classes de animação
+        stepAtual.classList.remove('active', 'slide-out-left', 'slide-out-right');
+        stepAtual.style.display = 'none';
+        
+        stepDestino.classList.remove('slide-in-right', 'slide-in-left');
+        stepDestino.classList.add('active');
+        
+        etapaAtual = destinoIndex;
+
+        // Atualiza visibilidade dos botões
+        btnVoltar.hidden = etapaAtual === 0;
+        btnProximo.hidden = etapaAtual === totalEtapas - 1;
+        btnFinalizar.hidden = etapaAtual !== totalEtapas - 1;
+
+        // Ajusta a altura após a transição
+        ajustarAlturaContainer();
+      }, transitionTime);
+    }
+
+    // Validação do formulário
+    function validarFormulario() {
+      const step = document.getElementById(`step-${etapaAtual}`);
+      const inputs = step.querySelectorAll("input, select");
+
+      // Valida campos obrigatórios
+      for (let input of inputs) {
+        if (input.hasAttribute("required") && !input.value) {
+          alert("Por favor, preencha todos os campos obrigatórios.");
+          input.focus();
+          return false;
+        }
+
+        // Verifica e-mail válido
+        if (input.type === "email") {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(input.value)) {
+            alert("Por favor, insira um e-mail válido.");
+            input.focus();
+            return false;
+          }
+        }
+      }
+
+      // Valida radio buttons agrupados
+      const radiosAgrupados = {};
+      for (let input of inputs) {
+        if (input.type === "radio") {
+          radiosAgrupados[input.name] = radiosAgrupados[input.name] || [];
+          radiosAgrupados[input.name].push(input);
+        }
+      }
+
+      for (let grupo in radiosAgrupados) {
+        const radios = radiosAgrupados[grupo];
+        if (radios[0].hasAttribute("required") && !radios.some(r => r.checked)) {
+          alert("Por favor, avalie todos os critérios obrigatórios.");
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    // Event listeners
+    btnProximo.addEventListener("click", () => {
+      if (validarFormulario()) {
+        trocarEtapa(true);
+      }
+    });
+
+    btnVoltar.addEventListener("click", () => trocarEtapa(false));
+
+    btnFinalizar.addEventListener("click", function (e) {
+      if (!validarFormulario()) {
+        e.preventDefault(); // Impede envio se algo estiver errado
+      }
+    });
+
+    // Ajusta a altura inicial e em redimensionamentos
+    window.addEventListener('load', ajustarAlturaContainer);
+    window.addEventListener('resize', ajustarAlturaContainer);
+
+    // Foco no primeiro campo ao carregar
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstInput = document.querySelector('.form-step.active input');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/temporizador_mensagem.js') }}"></script>
+</body>
+</html>

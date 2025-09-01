@@ -1,0 +1,88 @@
+{% extends '/usuario_aluno/menu_user_aluno.html' %}
+
+{% block content %}
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .card {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+<header>
+    <h1>Lista de Análise Sensorial em Andamento</h1>
+  </header>
+
+<br>
+  <div class="table-responsive custom-table">
+          <table class="table table-bordered table-hover align-middle text-center custom-table">
+            <thead class="table-success">
+              <tr>
+                <th>#</th>
+                <th>Produto</th>
+                <th>Status</th>
+                <th class="d-none d-md-table-cell">Responsável</th>
+                <th class="d-none d-md-table-cell">Data</th>
+                <th class="d-none d-md-table-cell">Tipo de Avaliação</th>
+                <th class="d-none d-md-table-cell">Quantidade de testes realizados</th>
+                <th class="actions">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for analise in analises %}
+              <tr id="analise-{{ analise.id }}">
+                <td>{{ loop.index }}</td>
+                <td>{{ analise.produto }}</td>
+                <td>{{ analise.status }}</td>
+                <td class="d-none d-md-table-cell">{{ analise.responsavel.nome if analise.responsavel else 'Nenhum' }}</td>
+                <td class="d-none d-md-table-cell">{{ analise.data }}</td>
+                <td class="d-none d-md-table-cell">{{ analise.teste }}</td>
+                <td class="d-none d-md-table-cell">{{ analise.quantidade_avaliacoes }}</td>
+                <td class="actions">
+                  <div class="d-flex justify-content-center gap-1">
+                    <a href="{{ url_for('formulario_analise', id=analise.id, produto=analise.produto, quantidade_amostras=analise.quantidade_amostras) }}" class="btn btn-sm btn-primary" title="Nova avaliação" target="_blank">
+                      <i class="fa-regular fa-square-plus"></i>
+                    </a>                                   
+                  </div>
+                 
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+{% endblock %}
