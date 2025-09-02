@@ -90,6 +90,16 @@ def aluno_dashboard():
                 'intencao_compra': round(linha.media_intencao_compra, 2) if linha.media_intencao_compra is not None else 0
             }
 
+           #calcula a quantidade de testes realizados      
+            testadores_unicos = (
+                db.query(Avaliacao.testador_id)
+                .join(Avaliacao.amostra)
+                .filter(Amostra.analise_id == analise.id, Avaliacao.testador_id != None)
+                .distinct()
+                .count()
+            )
+            analise.quantidade_avaliacoes = testadores_unicos
+
      
       
         return render_template("usuario_aluno/dashboard.html", analises=analises, medias_avaliacores=medias_avaliacores )

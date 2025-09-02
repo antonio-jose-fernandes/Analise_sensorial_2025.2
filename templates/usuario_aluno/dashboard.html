@@ -56,13 +56,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    
    {% for analise in analises %}
 
        <div class="container" style="width: 100%;"> 
     <table class="table" >
         <thead>
             <tr>
-          <th colspan="2" scope="col">Dados da análise:{{ analise.produto }}</th>    
+          <th colspan="{{analise.quantidade_amostras + 1}}" scope="col">Dados da análise:{{ analise.produto }}</th>    
         </tr>
         
       </thead>
@@ -72,7 +73,7 @@
           <div class="card">
             <ul>
               <li>Status:{{ analise.status }}</li>
-              <li>Testes realizados: 12</li>
+              <li>Testes realizados: {{ analise.quantidade_avaliacoes }}</li>
             </ul>
           </div>
         </td>
@@ -82,14 +83,45 @@
             <td>
              <div class="card"  >
                 <h2>Amostra {{amostra.descricao}}</h2>
-                  <div id="chat{{amostra.id}}" ></div>
+                  <div id="chat{{amostra.id}}"></div>
               </div>
               </td>
 
+              <script type="text/javascript">
+                  google.charts.load('current', {'packages': ['corechart']});
+                  google.charts.setOnLoadCallback(drawChart);
+                  function drawChart() {
+                      var data = google.visualization.arrayToDataTable([
+                          [''
+                            ,'Impressão Global','Cor','Aroma','Textura','Sabor','Intenção de compra'
+                          ],
+                          [''
+                            ,{{medias_avaliacores[amostra.id].impressao_global}}
+                            ,{{medias_avaliacores[amostra.id].cor}}
+                            ,{{medias_avaliacores[amostra.id].aroma}}
+                            ,{{medias_avaliacores[amostra.id].textura}}
+                            ,{{medias_avaliacores[amostra.id].sabor}}
+                            ,{{medias_avaliacores[amostra.id].intencao_compra}}
+                          ],
+                      ]);
+
+                      var options = {
+                          title: '',
+                          curveType: 'function',
+                          legend: {position: 'bottom'},
+                          colors: ['#0000FF', '#FF0000', '#00FF7F', '#FFFF00', '#B0C4DE', '#3CB371'],
+                          vAxis: {
+                              title: 'Média'
+                          }
+                      };
+                      var chart = new google.visualization.ColumnChart(document.getElementById('chat{{amostra.id}}'));
+                      chart.draw(data, options);
+                  }
+              </script>
             
               
             {% endfor %}
-      
+    
         </tr>
         </tbody>
       </table>
