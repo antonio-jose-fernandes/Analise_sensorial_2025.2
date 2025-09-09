@@ -10,6 +10,7 @@ import random
 from models.conexao import *
 from sqlalchemy.orm import sessionmaker, joinedload
 from sqlalchemy import select, desc
+from sqlalchemy.exc import IntegrityError
 
 # Criando a sessão para interagir com o banco de dados
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -168,8 +169,12 @@ def excluir_analise(id):
     if not analise:
         db.close()
         flash("Análise não encontrada!", "error")
-        return redirect(url_for('lista_analises'))
-
+        return redirect(url_for('lista_analises'))     
+    
+    if len(analise.amostras) > 0:
+       flash("Análise não pode ser excluída! Existe amostras associadas a ela.", "error")
+       return redirect(url_for('lista_analises'))   
+    
     db.delete(analise)
     db.commit()
     db.close()
