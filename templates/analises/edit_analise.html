@@ -63,12 +63,6 @@
             <option value="Finalizado" {% if analise.status=='Finalizado' %}selected{% endif %}>Finalizado</option>
           </select>
 
-          <label for="teste">Teste:</label>
-          <input type="text" name="teste" id="teste" value="{{ analise.teste }}" required>
-
-          <label for="quantidade_amostras">Quantidade de Amostras:</label>
-          <input type="number" id="quantidade_amostras" name="quantidade_amostras" value="{{ analise.quantidade_amostras }}" min="1" required>
-
           <label for="quantidade_avaliadores">Quantidade de Avaliadores:</label>
           <input type="number" id="quantidade_avaliadores" name="quantidade_avaliadores" value="{{ analise.quantidade_avaliadores }}" min="1" required>
 

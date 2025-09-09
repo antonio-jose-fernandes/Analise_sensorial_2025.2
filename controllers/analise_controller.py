@@ -149,9 +149,9 @@ def editar_analise(id):
     analise.produto = request.form['produto']
     analise.responsavel_id = responsavel_id
     analise.data = request.form['data']
-    analise.status = request.form['status']
-    analise.teste = request.form['teste']
-    analise.quantidade_amostras = request.form['quantidade_amostras']
+    analise.status = request.form['status']    
+    analise.teste = "" #request.form['teste']
+    analise.quantidade_amostras = 0 #request.form['quantidade_amostras']
     analise.quantidade_avaliadores = request.form['quantidade_avaliadores']
     analise.justificativa = request.form['justificativa']
 
