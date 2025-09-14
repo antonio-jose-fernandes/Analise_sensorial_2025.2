@@ -92,7 +92,7 @@
                   google.charts.setOnLoadCallback(drawChart);
                   function drawChart() {
                       var data = google.visualization.arrayToDataTable([
-                          [''
+                          ['Amostra'
                             ,'Impressão Global','Cor','Aroma','Textura','Sabor','Intenção de compra'
                           ],
                           [''
@@ -102,7 +102,7 @@
                             ,{{medias_avaliacores[amostra.id].textura}}
                             ,{{medias_avaliacores[amostra.id].sabor}}
                             ,{{medias_avaliacores[amostra.id].intencao_compra}}
-                          ],
+                          ]
                       ]);
 
                       var options = {

@@ -299,8 +299,8 @@
           <label>Nome Completo *</label>
           <input type="text" name="nome" required>
 
-          <label>Email *</label>
-          <input type="email" name="email" required>
+          <!-- <label>Email *</label>
+          <input type="email" name="email" required> -->
 
           <label>Gênero *</label>
           <select name="genero" required>
@@ -331,7 +331,7 @@
           {% for campo in campos %}
             <label>{{ campo }} *</label>
             <div class="rating-group">
-              {% for n in range(1,10) %}
+              {% for n in range(1,11) %}
               <label>
                 <input type="radio" name="{{ campo|lower|replace(' ', '_') }}_{{ i }}" value="{{ n }}" required>
                 <span>{{ n }}</span>
@@ -365,142 +365,175 @@
     </form>
   </div>
 
-  <script>
-    let etapaAtual = 0;
-    const totalEtapas = {{ quantidade_amostras + 1 }};
-    const transitionTime = 500;
+<script>
+  let etapaAtual = 0;
+  const totalEtapas = {{ quantidade_amostras + 1 }};
+  const transitionTime = 500;
+  const usuarioAutenticado = {{ 'true' if usuario_autenticado else 'false' }};
 
-    const btnProximo = document.getElementById("btn-proximo");
-    const btnVoltar = document.getElementById("btn-voltar");
-    const btnFinalizar = document.getElementById("btn-finalizar");
+  const btnProximo = document.getElementById("btn-proximo");
+  const btnVoltar = document.getElementById("btn-voltar");
+  const btnFinalizar = document.getElementById("btn-finalizar");
 
-    function ajustarAlturaContainer() {
-      const stepAtual = document.getElementById(`step-${etapaAtual}`);
-      const container = document.querySelector('.step-container');
-      if (stepAtual && container) {
-        container.style.minHeight = stepAtual.scrollHeight + 'px';
-      }
+  function ajustarAlturaContainer() {
+    const stepAtual = document.getElementById(`step-${etapaAtual}`);
+    const container = document.querySelector('.step-container');
+    if (stepAtual && container) {
+      container.style.minHeight = stepAtual.scrollHeight + 'px';
+    }
+  }
+
+  function trocarEtapa(proxima) {
+    const stepAtual = document.getElementById(`step-${etapaAtual}`);
+    const destinoIndex = etapaAtual + (proxima ? 1 : -1);
+    const stepDestino = document.getElementById(`step-${destinoIndex}`);
+
+    if (!stepDestino) return;
+
+    // Pré-ajusta a altura do container
+    const container = document.querySelector('.step-container');
+    container.style.minHeight = Math.max(stepAtual.scrollHeight, stepDestino.scrollHeight) + 'px';
+
+    // Mostra o step destino antes da animação
+    stepDestino.style.display = 'block';
+    
+    if (proxima) {
+      // Animação para PRÓXIMO:
+      // 1. Formulário atual sai pela esquerda
+      stepAtual.classList.add('slide-out-left');
+      // 2. Novo formulário entra pela direita
+      stepDestino.classList.add('slide-in-right');
+    } else {
+      // Animação para VOLTAR:
+      // 1. Formulário atual sai pela direita
+      stepAtual.classList.add('slide-out-right');
+      // 2. Formulário anterior entra pela esquerda
+      stepDestino.classList.add('slide-in-left');
     }
 
-    function trocarEtapa(proxima) {
-      const stepAtual = document.getElementById(`step-${etapaAtual}`);
-      const destinoIndex = etapaAtual + (proxima ? 1 : -1);
-      const stepDestino = document.getElementById(`step-${destinoIndex}`);
-
-      if (!stepDestino) return;
-
-      // Pré-ajusta a altura do container
-      const container = document.querySelector('.step-container');
-      container.style.minHeight = Math.max(stepAtual.scrollHeight, stepDestino.scrollHeight) + 'px';
-
-      // Mostra o step destino antes da animação
-      stepDestino.style.display = 'block';
+    setTimeout(() => {
+      // Limpa as classes de animação
+      stepAtual.classList.remove('active', 'slide-out-left', 'slide-out-right');
+      stepAtual.style.display = 'none';
       
-      if (proxima) {
-        // Animação para PRÓXIMO:
-        // 1. Formulário atual sai pela esquerda
-        stepAtual.classList.add('slide-out-left');
-        // 2. Novo formulário entra pela direita
-        stepDestino.classList.add('slide-in-right');
-      } else {
-        // Animação para VOLTAR:
-        // 1. Formulário atual sai pela direita
-        stepAtual.classList.add('slide-out-right');
-        // 2. Formulário anterior entra pela esquerda
-        stepDestino.classList.add('slide-in-left');
+      stepDestino.classList.remove('slide-in-right', 'slide-in-left');
+      stepDestino.classList.add('active');
+      
+      etapaAtual = destinoIndex;
+
+      // Atualiza visibilidade dos botões
+      btnVoltar.hidden = etapaAtual === 0;
+      btnProximo.hidden = etapaAtual === totalEtapas - 1;
+      btnFinalizar.hidden = etapaAtual !== totalEtapas - 1;
+
+      // Ajusta a altura após a transição
+      ajustarAlturaContainer();
+    }, transitionTime);
+  }
+
+  // Validação do formulário
+  function validarFormulario() {
+    // Se for a primeira etapa (dados do avaliador) e usuário já está autenticado, pular validação
+    if (etapaAtual === 0 && usuarioAutenticado) {
+      return true;
+    }
+    
+    const step = document.getElementById(`step-${etapaAtual}`);
+    const inputs = step.querySelectorAll("input, select");
+
+    // Valida campos obrigatórios
+    for (let input of inputs) {
+      if (input.hasAttribute("required") && !input.value) {
+        alert("Por favor, preencha todos os campos obrigatórios.");
+        input.focus();
+        return false;
       }
 
-      setTimeout(() => {
-        // Limpa as classes de animação
-        stepAtual.classList.remove('active', 'slide-out-left', 'slide-out-right');
-        stepAtual.style.display = 'none';
-        
-        stepDestino.classList.remove('slide-in-right', 'slide-in-left');
-        stepDestino.classList.add('active');
-        
-        etapaAtual = destinoIndex;
-
-        // Atualiza visibilidade dos botões
-        btnVoltar.hidden = etapaAtual === 0;
-        btnProximo.hidden = etapaAtual === totalEtapas - 1;
-        btnFinalizar.hidden = etapaAtual !== totalEtapas - 1;
-
-        // Ajusta a altura após a transição
-        ajustarAlturaContainer();
-      }, transitionTime);
-    }
-
-    // Validação do formulário
-    function validarFormulario() {
-      const step = document.getElementById(`step-${etapaAtual}`);
-      const inputs = step.querySelectorAll("input, select");
-
-      // Valida campos obrigatórios
-      for (let input of inputs) {
-        if (input.hasAttribute("required") && !input.value) {
-          alert("Por favor, preencha todos os campos obrigatórios.");
+      // Verifica e-mail válido (apenas se não estiver autenticado)
+      if (input.type === "email" && !usuarioAutenticado) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value)) {
+          alert("Por favor, insira um e-mail válido.");
           input.focus();
           return false;
         }
-
-        // Verifica e-mail válido
-        if (input.type === "email") {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(input.value)) {
-            alert("Por favor, insira um e-mail válido.");
-            input.focus();
-            return false;
-          }
-        }
       }
-
-      // Valida radio buttons agrupados
-      const radiosAgrupados = {};
-      for (let input of inputs) {
-        if (input.type === "radio") {
-          radiosAgrupados[input.name] = radiosAgrupados[input.name] || [];
-          radiosAgrupados[input.name].push(input);
-        }
-      }
-
-      for (let grupo in radiosAgrupados) {
-        const radios = radiosAgrupados[grupo];
-        if (radios[0].hasAttribute("required") && !radios.some(r => r.checked)) {
-          alert("Por favor, avalie todos os critérios obrigatórios.");
-          return false;
-        }
-      }
-
-      return true;
     }
 
-    // Event listeners
-    btnProximo.addEventListener("click", () => {
-      if (validarFormulario()) {
-        trocarEtapa(true);
+    // Valida radio buttons agrupados
+    const radiosAgrupados = {};
+    for (let input of inputs) {
+      if (input.type === "radio") {
+        radiosAgrupados[input.name] = radiosAgrupados[input.name] || [];
+        radiosAgrupados[input.name].push(input);
       }
-    });
+    }
 
-    btnVoltar.addEventListener("click", () => trocarEtapa(false));
-
-    btnFinalizar.addEventListener("click", function (e) {
-      if (!validarFormulario()) {
-        e.preventDefault(); // Impede envio se algo estiver errado
+    for (let grupo in radiosAgrupados) {
+      const radios = radiosAgrupados[grupo];
+      if (radios[0].hasAttribute("required") && !radios.some(r => r.checked)) {
+        alert("Por favor, avalie todos os critérios obrigatórios.");
+        return false;
       }
-    });
+    }
 
-    // Ajusta a altura inicial e em redimensionamentos
-    window.addEventListener('load', ajustarAlturaContainer);
-    window.addEventListener('resize', ajustarAlturaContainer);
+    return true;
+  }
 
-    // Foco no primeiro campo ao carregar
-    document.addEventListener('DOMContentLoaded', () => {
-      const firstInput = document.querySelector('.form-step.active input');
-      if (firstInput) {
-        firstInput.focus();
-      }
-    });
-  </script>
+  // Event listeners
+  btnProximo.addEventListener("click", () => {
+    // Se não estiver autenticado, redirecionar para login
+    if (!usuarioAutenticado && etapaAtual === 0) {
+      window.location.href = "{{ url_for('iniciar_avaliacao', id=id) }}";
+      return;
+    }
+    
+    if (validarFormulario()) {
+      trocarEtapa(true);
+    }
+  });
+
+  btnVoltar.addEventListener("click", () => trocarEtapa(false));
+
+  btnFinalizar.addEventListener("click", function (e) {
+    if (!validarFormulario()) {
+      e.preventDefault(); // Impede envio se algo estiver errado
+    }
+  });
+
+  // Ajusta a altura inicial e em redimensionamentos
+  window.addEventListener('load', ajustarAlturaContainer);
+  window.addEventListener('resize', ajustarAlturaContainer);
+
+  // Foco no primeiro campo ao carregar
+  document.addEventListener('DOMContentLoaded', () => {
+    const firstInput = document.querySelector('.form-step.active input');
+    if (firstInput) {
+      firstInput.focus();
+    }
+    
+    // // Preencher automaticamente os dados se o usuário estiver autenticado
+    // if (usuarioAutenticado) {
+    //   // Preencher dados do Google se disponíveis
+    //   const nomeInput = document.querySelector('input[name="nome"]');
+    //   const emailInput = document.querySelector('input[name="email"]');
+      
+    //   // Tornar os campos readonly
+    //   if (nomeInput) {
+    //     nomeInput.value = "{{ session.get('google_name', '') }}";
+    //     nomeInput.readOnly = true;
+    //   }
+    //   if (emailInput) {
+    //     emailInput.value = "{{ session.get('google_email', '') }}";
+    //     emailInput.readOnly = true;
+    //   }
+      
+    //   // Adicionar estilo visual para indicar que os campos estão pré-preenchidos
+    //   if (nomeInput) nomeInput.style.backgroundColor = '#f8f9fa';
+    //   if (emailInput) emailInput.style.backgroundColor = '#f8f9fa';
+    // }
+  });
+</script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/temporizador_mensagem.js') }}"></script>

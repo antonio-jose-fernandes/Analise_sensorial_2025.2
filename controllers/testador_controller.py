@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from models.conexao import *
 from models.analise_model import *
 from models.amostra_model import *
@@ -23,18 +23,40 @@ def formulario_analise(id):
         produto = analise.produto
         quantidade_amostras = len(analise.amostras)
 
+        # Verificar se o usuário já está autenticado via session
+        usuario_autenticado = session.get('google_authenticated', False)
+
         return render_template(
             "/avaliador/ficha.html",
             produto=produto,
             quantidade_amostras=quantidade_amostras,
-            id=id
+            id=id,
+            usuario_autenticado=usuario_autenticado
         )
     finally:
         db.close()
 
+# Rota intermediária para login do Google
+@app.route('/iniciar_avaliacao/<int:id>', methods=['GET'])
+def iniciar_avaliacao(id):
+    # Se já estiver autenticado, redireciona direto
+    if session.get('google_authenticated'):
+        return redirect(url_for('formulario_analise', id=id))
+    
+    # Salva o ID da análise na session e redireciona para login
+    session['analise_id'] = id
+    session['next_url'] = url_for('formulario_analise', id=id)
+    return redirect(url_for('google_login'))
+
 
 @app.route('/avaliacao/<int:id>', methods=['POST'])
 def salvar_avaliacoes(id):
+    # Verificar se o usuário está autenticado antes de salvar
+    if not session.get('google_authenticated'):
+        flash("Por favor, faça login com Google antes de enviar a avaliação.", "error")
+        return redirect(url_for('iniciar_avaliacao', id=id))
+    
+
     db = SessionLocal()
     try:
         # 1. Verificar se todas as amostras existem antes de salvar
@@ -66,7 +88,7 @@ def salvar_avaliacoes(id):
         # 2. Se todas as amostras são válidas, salvar o testador
         testador = Testador(
             nome=request.form.get("nome"),
-            email=request.form.get("email"),
+            email=session.get('google_email'),
             genero=request.form.get("genero"),
             faixa_etaria=request.form.get("faixa_etaria")
         )
@@ -88,6 +110,11 @@ def salvar_avaliacoes(id):
 
         db.commit()
         flash("Avaliação salva com sucesso!", "success")
+        
+        # Limpar a sessão de autenticação após envio bem-sucedido
+        session.pop('google_authenticated', None)
+        session.clear()
+        
         return redirect(url_for('formulario_analise', id=id))
 
     except Exception as e:

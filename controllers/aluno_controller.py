@@ -63,6 +63,8 @@ def aluno_dashboard():
             .group_by(Analise.id)
             .order_by(desc(Analise.id))
             .all()    )
+        
+        medias_avaliacores ={}
 
         for analise in analises:
             analise.quantidade_amostras = len(analise.amostras)
@@ -79,7 +81,7 @@ def aluno_dashboard():
                 )
                 .group_by(Avaliacao.amostra_id)
                 .all()) 
-            medias_avaliacores ={}
+            
             for linha in medias:
                 medias_avaliacores[linha.amostra_id] = {
                 'impressao_global': round(linha.media_impressao_global, 2)  if linha.media_impressao_global is not None else 0,

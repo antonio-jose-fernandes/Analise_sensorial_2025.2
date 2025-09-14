@@ -1,4 +1,4 @@
-from app import app
+from main import app
 from flask import render_template
 from models.conexao import db
 from models.avaliacao_modal import Avaliacao
