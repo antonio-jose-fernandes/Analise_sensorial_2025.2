@@ -18,3 +18,5 @@ flask
 flask-mysql
 mysql-connector-python
 werkzeug
+flask-login
+requests
