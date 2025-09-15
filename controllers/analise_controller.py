@@ -323,3 +323,4 @@ def criar_avaliacoes_banco(permutacoes, qtdTotalAvaliacoes, qtdAmostras):
 
 def gerar_pdf_distribuicao_avaliacao(id):
     return redirect(url_for('gerar_pdf_distribuicao_avaliacao', analise_id=id))
+
