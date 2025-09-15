@@ -116,7 +116,45 @@ def aluno_dashboard():
 def aluno_analise():
     return render_template("/usuario_aluno/analise.html")
 
+
+
+
+# Lista análises em andamento com suas amostras e quantidade de avaliações feitas
+@app.route("/aluno/analise/extrair", methods=['GET'])
+def extrair_dados_analise():
+    db = SessionLocal()
+    try:
+        analises = (
+            db.query(Analise)
+            .join(Analise.amostras)
+            .filter(Analise.status == 'Em andamento')
+            .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
+            .order_by(desc(Analise.id))
+            .all()
+        )
+
+        for analise in analises:
+            analise.quantidade_amostras = len(analise.amostras)
+
+            testadores_unicos = (
+                db.query(Avaliacao.testador_id)
+                .join(Avaliacao.amostra)
+                .filter(Amostra.analise_id == analise.id, Avaliacao.testador_id != None)
+                .distinct()
+                .count()
+            )
+
+            analise.quantidade_avaliacoes = testadores_unicos
+
+        return render_template("/usuario_aluno/extrair_dados_analise.html", analises=analises)
+    finally:
+        db.close()
+
+
+
+
 # Rota de teste que aponta para dashboard
 @app.route("/teste", methods=['GET'])
 def teste():
     return render_template("/usuario_aluno/dashboard.html")
+
