@@ -69,6 +69,13 @@
                     </a>                       
                   </div>
                   <br>
+                   <div class="d-flex justify-content-center gap-1">
+                    <a href="{{ url_for('gerar_pdf_media_avaliacao', analise_id=analise.id) }}" class="btn btn-sm btn-primary" title="Médias" target="_blank">
+                      <i class="fa-regular fa-square-plus"></i> Avaliações 
+                    </a>                       
+                  </div>
+
+                  <br>
                   <div class="d-flex justify-content-center gap-1">
                     <a href="{{ url_for('formulario_analise', id=analise.id, produto=analise.produto, quantidade_amostras=analise.quantidade_amostras) }}" class="btn btn-sm btn-primary" title="Nova avaliação" target="_blank">
                       <i class="fa-regular fa-square-plus"></i> Notas

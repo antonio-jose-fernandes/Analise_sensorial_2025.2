@@ -136,11 +136,13 @@ def gerar_pdf_media_avaliacao(analise_id):
         .join(Avaliacao.amostra)
         .join(Amostra.analise)
         .where(Analise.id == analise_id)
+        .where(Avaliacao.testador_id.isnot(None))
         .order_by(Avaliacao.id) 
     ).scalars().all()
     analise = db.query(Analise).filter_by(id=analise_id).first()
 
     amostras = db.query(Amostra).filter_by(analise_id=analise_id).all()
+    
     descricao_das_amostras = [obj.descricao for obj in amostras]
     qtd_colunas_por_amostras = len(amostras)    
     db.close()
@@ -152,7 +154,7 @@ def gerar_pdf_media_avaliacao(analise_id):
     estilos = getSampleStyleSheet()
 
     # Título
-    titulo = Paragraph(f"<b>Média da análise: {analise.produto}</b>", estilos["Title"])
+    titulo = Paragraph(f"<b>{analise.produto}</b><br/> <b>Médias da análise por atributo </b>", estilos["Title"])
     elementos.append(titulo)
     elementos.append(Spacer(1, 20))
 
