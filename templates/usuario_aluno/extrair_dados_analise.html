@@ -74,13 +74,10 @@
                       <i class="fa-regular fa-square-plus"></i> Médias
                     </a>                       
                   </div>
-                 
-                  
-
                   <br>
                   <div class="d-flex justify-content-center gap-1">
-                    <a href="{{ url_for('formulario_analise', id=analise.id, produto=analise.produto, quantidade_amostras=analise.quantidade_amostras) }}" class="btn btn-sm btn-primary" style="width: 200px; height:30px; background-color: #32CD32;" title="Nova avaliação" target="_blank">
-                      <i class="fa-regular fa-square-plus"></i> Notas
+                    <a href="{{ url_for('gerar_pdf_variancia', analise_id=analise.id) }}" class="btn btn-sm btn-primary" style="width: 200px; height:30px; background-color: #32CD32;" title="Nova avaliação" target="_blank">
+                      <i class="fa-regular fa-square-plus"></i> Variância
                     </a>                       
                   </div>
                  

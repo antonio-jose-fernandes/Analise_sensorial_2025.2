@@ -21,6 +21,8 @@ from reportlab.lib.styles import ParagraphStyle
 
 from pdf_dos_relatorios.media_avaliacoes_rel import *
 from pdf_dos_relatorios.avaliacoes_realizadas_rel import *
+from pdf_dos_relatorios.variancia_rel import *
+
 # Criando a sessão para interagir com o banco de dados
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
