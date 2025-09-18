@@ -56,7 +56,7 @@ def gerar_pdf_media_avaliacao(analise_id):
     # Dados formatados em tabela cabecalho    
     cabecalho = ['Controle']  
     for amostra2 in amostras:
-       textoCabecalho = 'Amostra: '+ str(amostra2.descricao)
+       textoCabecalho = ' '+ str(amostra2.descricao)
        cabecalho.append(textoCabecalho)
     estilo_texto = estilos["Normal"]
     estilo_centralizado = ParagraphStyle(

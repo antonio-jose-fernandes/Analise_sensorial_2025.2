@@ -64,20 +64,20 @@
                 <td class="d-none d-md-table-cell">{{ analise.quantidade_avaliacoes }}</td>
                 <td class="actions">
                    <div class="d-flex justify-content-center gap-1">
-                    <a href="{{ url_for('gerar_pdf_avaliacoes_realizadas', analise_id=analise.id) }}" style="width: 200px; height:30px; background-color: #9ACD32;" class="btn btn-sm btn-primary" target="_blank">
-                      <i class="fa-regular fa-square-plus"></i> Avaliações 
+                    <a href="{{ url_for('gerar_pdf_avaliacoes_realizadas', analise_id=analise.id) }}" style="width: 200px; height:30px; background-color: #9ACD32;  margin: 1%;" class="btn btn-sm btn-primary" target="_blank">
+                      <i class="fa-chisel fa-regular fa-newspaper"></i> Avaliações 
                     </a>                       
                   </div>
-                  <br>
+                 
                   <div class="d-flex justify-content-center gap-1">
-                    <a href="{{ url_for('gerar_pdf_media_avaliacao', analise_id=analise.id) }}" class="btn btn-sm btn-primary" style="width: 200px; height:30px; background-color: #4CAF50;"  target="_blank">
-                      <i class="fa-regular fa-square-plus"></i> Médias
+                    <a href="{{ url_for('gerar_pdf_media_avaliacao', analise_id=analise.id) }}" class="btn btn-sm btn-primary" style="width: 200px; height:30px; background-color: #4CAF50; margin: 1%;"  target="_blank">
+                      <i class="fa-chisel fa-regular fa-chart-bar"></i> Médias
                     </a>                       
                   </div>
-                  <br>
+                 
                   <div class="d-flex justify-content-center gap-1">
-                    <a href="{{ url_for('gerar_pdf_variancia', analise_id=analise.id) }}" class="btn btn-sm btn-primary" style="width: 200px; height:30px; background-color: #32CD32;" title="Nova avaliação" target="_blank">
-                      <i class="fa-regular fa-square-plus"></i> Variância
+                    <a href="{{ url_for('gerar_pdf_variancia', analise_id=analise.id) }}" class="btn btn-sm btn-primary" style="width: 200px; height:30px; background-color: #32CD32;  margin: 1%;" title="Nova avaliação" target="_blank">
+                      <i class="fa-chisel fa-regular fa-file"></i> Variância 
                     </a>                       
                   </div>
                  

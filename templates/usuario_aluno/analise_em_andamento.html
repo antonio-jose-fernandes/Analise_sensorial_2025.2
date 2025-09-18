@@ -49,7 +49,6 @@
                 <th>Status</th>
                 <th class="d-none d-md-table-cell">Responsável</th>
                 <th class="d-none d-md-table-cell">Data</th>
-                <th class="d-none d-md-table-cell">Tipo de Avaliação</th>
                 <th class="d-none d-md-table-cell">Quantidade de testes realizados</th>
                 <th class="actions">Ações</th>
               </tr>
@@ -61,8 +60,7 @@
                 <td>{{ analise.produto }}</td>
                 <td>{{ analise.status }}</td>
                 <td class="d-none d-md-table-cell">{{ analise.responsavel.nome if analise.responsavel else 'Nenhum' }}</td>
-                <td class="d-none d-md-table-cell">{{ analise.data }}</td>
-                <td class="d-none d-md-table-cell">{{ analise.teste }}</td>
+                <td class="d-none d-md-table-cell">{{  analise.data[8:10] }}/{{ analise.data[5:7] }}/{{ analise.data[0:4] }}</td>
                 <td class="d-none d-md-table-cell">{{ analise.quantidade_avaliacoes }}</td>
                 <td class="actions">
                   <div class="d-flex justify-content-center gap-1">

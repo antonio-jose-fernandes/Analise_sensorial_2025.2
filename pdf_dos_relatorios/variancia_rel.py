@@ -19,6 +19,11 @@ from sqlalchemy.inspection import inspect
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.styles import ParagraphStyle
 
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+import pandas as pd
+import numpy as np
+from scipy.stats import f as f_dist
+
 from statistics import mean
 from scipy.stats import f
 try:
@@ -122,95 +127,104 @@ def gerar_pdf_variancia(analise_id):
   
   
   
-    # map para buscar descrições rápido (opcional)
-    amostra_map = {a.id: a.descricao for a in amostras}
-
     for atributo in colunas_avaliaveis:
-        # agrupar apenas valores numéricos por amostra
-        valores_por_amostra = {}
+        # Agrupar valores por amostra
+        valores = []
+        grupos_amostra = []
+        grupos_avaliador = []
         for avaliacao in avaliacoes:
             try:
                 v = float(getattr(avaliacao, atributo))
             except (TypeError, ValueError):
                 continue
-            valores_por_amostra.setdefault(avaliacao.amostra_id, []).append(v)
+            valores.append(v)
+            grupos_amostra.append(avaliacao.amostra_id)
+            grupos_avaliador.append(avaliacao.testador_id)
 
-        # filtrar amostras com pelo menos 1 observação
-        grupos = {aid: vals for aid, vals in valores_por_amostra.items() if len(vals) > 0}
-        geral = [v for vals in grupos.values() for v in vals]
-
-        # título do atributo
         titulo_formatado = titulos_atributos.get(atributo, atributo.capitalize())
         elementos.append(Spacer(1, 12))
         elementos.append(Paragraph(f"<b>{titulo_formatado}</b>", estilos["Heading2"]))
         elementos.append(Spacer(1, 6))
 
-        # se não houver dados suficientes, mostra linha informativa
-        if not geral or len(grupos) < 2:
-            dados = [["Causas de Variação (C.V)", "G.L.", "S.Q.", "Q.M.", "F"],
-                    ["Sem dados numéricos suficientes para este atributo", "", "", "", ""]]
-        else:
-            k = len(grupos)                     # número de grupos (amostras com dados)
-            N = sum(len(vals) for vals in grupos.values())  # total de observações
-            media_geral = sum(geral) / len(geral)
+        if len(valores) < 2 or len(set(grupos_amostra)) < 2:
+            elementos.append(Paragraph("Sem dados suficientes para este atributo", estilos["Normal"]))
+            continue
 
-            # SQ entre (amostras): sum n_j * (mean_j - media_geral)^2
-            SQ_amostra = 0.0
-            for vals in grupos.values():
-                mean_j = sum(vals) / len(vals)
-                SQ_amostra += len(vals) * (mean_j - media_geral) ** 2
+        # -------------------------------
+        # 🔹 ANOVA de duas vias (Amostra e Avaliador)
+        # -------------------------------
+        df = pd.DataFrame({
+            "valor": valores,
+            "amostra": grupos_amostra,
+            "avaliador": grupos_avaliador
+        })
 
-            # SQ dentro (erro): soma das variâncias dentro de cada grupo
-            SQ_erro = 0.0
-            for vals in grupos.values():
-                mean_j = sum(vals) / len(vals)
-                SQ_erro += sum((v - mean_j) ** 2 for v in vals)
+        medias = df.groupby("amostra")["valor"].mean()
+        media_geral = df["valor"].mean()
 
-            SQ_total = sum((v - media_geral) ** 2 for v in geral)
+        # SQ Amostra
+        SQ_amostra = sum(df.groupby("amostra").size() * (medias - media_geral) ** 2)
 
-            GL_amostra = k - 1
-            GL_erro = N - k
-            GL_total = N - 1
+        # SQ Avaliador
+        medias_avaliador = df.groupby("avaliador")["valor"].mean()
+        SQ_avaliador = sum(df.groupby("avaliador").size() * (medias_avaliador - media_geral) ** 2)
 
-            QM_amostra = SQ_amostra / GL_amostra if GL_amostra > 0 else None
-            QM_erro = SQ_erro / GL_erro if GL_erro > 0 else None
+        # SQ Total
+        SQ_total = sum((df["valor"] - media_geral) ** 2)
 
-            if QM_amostra is not None and QM_erro and QM_erro > 0:
-                Fcalc = QM_amostra / QM_erro
-                if f_dist is not None:
-                    try:
-                        p_valor = f_dist.sf(Fcalc, GL_amostra, GL_erro)
-                    except Exception:
-                        p_valor = ""
-                else:
-                    p_valor = ""
-            else:
-                Fcalc = ""
-                p_valor = ""
+        # SQ Erro
+        SQ_erro = SQ_total - SQ_amostra - SQ_avaliador
 
-            dados = [
-                ["Causas de Variação (C.V)", "G.L.", "S.Q.", "Q.M.", "F"],
-                ["Amostras", GL_amostra, round(SQ_amostra, 2),
-                round(QM_amostra, 2) if QM_amostra is not None else "",
-                round(Fcalc, 3) if Fcalc != "" else ""],
-                ["Resíduo", GL_erro, round(SQ_erro, 2),
-                round(QM_erro, 2) if QM_erro is not None else "", ""],
-                ["Total", GL_total, round(SQ_total, 2), "", ""],
-            ]
+        # Graus de liberdade
+        GL_amostra = df["amostra"].nunique() - 1
+        GL_avaliador = df["avaliador"].nunique() - 1
+        GL_total = len(df) - 1
+        GL_erro = GL_total - GL_amostra - GL_avaliador
 
-        # construir a tabela (mesma estilização que você usa)
-        colWidths = [120, 40, 70, 70, 50]
-        tabela = Table(dados, colWidths=colWidths, repeatRows=1)
+        # Quadrados médios
+        QM_amostra = SQ_amostra / GL_amostra if GL_amostra > 0 else np.nan
+        QM_avaliador = SQ_avaliador / GL_avaliador if GL_avaliador > 0 else np.nan
+        QM_erro = SQ_erro / GL_erro if GL_erro > 0 else np.nan
 
-        estilo = list(estilo_base)
-        for i in range(1, len(dados)):
-            cor_fundo = verde_claro if i % 2 == 0 else verde_mais_claro
-            estilo.append(('BACKGROUND', (0, i), (-1, i), cor_fundo))
-            estilo.append(('TEXTCOLOR', (0, i), (-1, i), verde_texto))
-            estilo.append(('ALIGN', (0, i), (-1, i), 'CENTER'))
+        # F e p-valor
+        F_amostra = QM_amostra / QM_erro if QM_erro > 0 else np.nan
+        F_avaliador = QM_avaliador / QM_erro if QM_erro > 0 else np.nan
+        p_amostra = f_dist.sf(F_amostra, GL_amostra, GL_erro) if not np.isnan(F_amostra) else ""
+        p_avaliador = f_dist.sf(F_avaliador, GL_avaliador, GL_erro) if not np.isnan(F_avaliador) else ""
 
-        tabela.setStyle(TableStyle(estilo))
-        elementos.append(tabela)
+        # Montar tabela ANOVA
+        dados_anova = [
+            ["Causas de Variação (C.V)", "G.L.", "S.Q.", "Q.M.", "F", "p-valor"],
+            ["Amostras", GL_amostra, round(SQ_amostra, 2), round(QM_amostra, 2), round(F_amostra, 3), f"{p_amostra:.4f}"],
+            ["Avaliadores", GL_avaliador, round(SQ_avaliador, 2), round(QM_avaliador, 2), round(F_avaliador, 3), f"{p_avaliador:.4f}"],
+            ["Resíduo", GL_erro, round(SQ_erro, 2), round(QM_erro, 2), "", ""],
+            ["Total", GL_total, round(SQ_total, 2), "", "", ""],
+        ]
+
+        tabela_anova = Table(dados_anova, colWidths=[120, 40, 70, 70, 50, 60])
+        tabela_anova.setStyle(TableStyle(estilo_base))
+        elementos.append(tabela_anova)
+
+        # -------------------------------
+        # 🔹 Teste de Tukey (apenas para Amostras)
+        # -------------------------------
+        id_to_nome = {amostra.id: amostra.descricao for amostra in amostras}
+        df["amostra_nome"] = df["amostra"].map(id_to_nome)
+
+        if len(set(grupos_amostra)) > 1:
+            tukey = pairwise_tukeyhsd(endog=df["valor"], groups=df["amostra_nome"], alpha=0.05)
+            df_tukey = pd.DataFrame(data=tukey.summary().data[1:], columns=tukey.summary().data[0])
+            dados_tukey = [df_tukey.columns.tolist()] + df_tukey.values.tolist()
+
+            # substitui a primeira linha (cabeçalho) por português
+            dados_tukey[0] = ["Grupo 1", "Grupo 2", "Diferença Média", "p-ajustado", "Limite Inferior", "Limite Superior", "Diferença Significativa"]
+
+
+            tabela_tukey = Table(dados_tukey, repeatRows=1)
+            tabela_tukey.setStyle(TableStyle(estilo_base))
+            elementos.append(Spacer(1, 12))
+            elementos.append(Paragraph(f"<b>Teste de Tukey - {titulo_formatado}</b>", estilos["Heading3"]))
+            elementos.append(tabela_tukey)
 
 
 

@@ -21,3 +21,4 @@ werkzeug
 flask-login
 requests
 scipy
+statsmodels
