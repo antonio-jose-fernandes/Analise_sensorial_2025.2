@@ -95,13 +95,13 @@
                           ['Amostra'
                             ,'Impressão Global','Cor','Aroma','Textura','Sabor','Intenção de compra'
                           ],
-                          [''
-                            ,{{medias_avaliacores[amostra.id].impressao_global}}
-                            ,{{medias_avaliacores[amostra.id].cor}}
-                            ,{{medias_avaliacores[amostra.id].aroma}}
-                            ,{{medias_avaliacores[amostra.id].textura}}
-                            ,{{medias_avaliacores[amostra.id].sabor}}
-                            ,{{medias_avaliacores[amostra.id].intencao_compra}}
+                          ['',
+                            {{ medias_avaliacores.get(amostra.id, {}).get('impressao_global', 0) }},
+                            {{ medias_avaliacores.get(amostra.id, {}).get('cor', 0) }},
+                            {{ medias_avaliacores.get(amostra.id, {}).get('aroma', 0) }},
+                            {{ medias_avaliacores.get(amostra.id, {}).get('textura', 0) }},
+                            {{ medias_avaliacores.get(amostra.id, {}).get('sabor', 0) }},
+                            {{ medias_avaliacores.get(amostra.id, {}).get('intencao_compra', 0) }}
                           ]
                       ]);
 

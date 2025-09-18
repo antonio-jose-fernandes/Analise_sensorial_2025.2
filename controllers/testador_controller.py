@@ -1,9 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from models.conexao import *
 from models.analise_model import *
 from models.amostra_model import *
 from models.testador_modal import *
 from models.avaliacao_modal import *
+import qrcode
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 
 from sqlalchemy.orm import sessionmaker
 from main import app
@@ -35,6 +40,63 @@ def formulario_analise(id):
         )
     finally:
         db.close()
+
+
+
+@app.route('/pdf_qrcode/<int:id>')
+def pdf_qrcode(id):
+    # URL que o QR Code vai abrir
+    url = url_for('formulario_analise', id=id, _external=True)
+
+    # Gerar QR Code
+    qr = qrcode.QRCode(box_size=10, border=4)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img_qr = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    
+    # Transformar QR Code em objeto compatível com ReportLab
+    qr_io = BytesIO()
+    img_qr.save(qr_io, format='PNG')
+    qr_io.seek(0)
+    qr_reader = ImageReader(qr_io)
+
+    # Criar PDF
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    # Definir título do PDF
+    c.setTitle("QR Code Avaliação")
+    largura, altura = A4
+    
+
+    # Parâmetros
+    qr_tamanho = 500  # tamanho do QR Code
+    margem_topo = 100  # espaço do topo para o título
+    espacamento_texto = 20  # espaço entre QR Code e texto
+
+    # Desenhar título centralizado
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(largura/2, altura - margem_topo, "QR Code da Avaliação")
+
+    # Calcular posição Y do QR Code (logo abaixo do título)
+    pos_y_qr = altura - margem_topo - 50 - qr_tamanho  # 50px abaixo do título
+    c.drawImage(qr_reader, (largura - qr_tamanho)/2, pos_y_qr, width=qr_tamanho, height=qr_tamanho)
+
+    # Texto explicativo abaixo do QR Code
+    c.setFont("Helvetica", 12)
+    c.drawCentredString(largura/2, pos_y_qr - espacamento_texto, "Escaneie para realizar a avaliação das amostras")
+
+    # Finalizar PDF
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype='application/pdf',
+        as_attachment=False,  # abre no navegador
+        download_name=f'qrcode_analise_{id}.pdf'
+    )
+
 
 # Rota intermediária para login do Google
 @app.route('/iniciar_avaliacao/<int:id>', methods=['GET'])

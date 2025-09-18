@@ -4,11 +4,14 @@ from urllib.parse import quote
 import secrets
 import requests
 from main import app
+from dotenv import load_dotenv
+
+load_dotenv()  # carrega o .env da raiz
 
 # Configurações do Google OAuth
-GOOGLE_CLIENT_ID = "1074459102699-rgc1474rv6g06lu9fbmodq9r46aa6qlk.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
-REDIRECT_URI = "http://localhost:5000/callback"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+REDIRECT_URI = "http://127.0.0.1:5000/callback"
 
 @app.route('/login/google')
 def google_login():
