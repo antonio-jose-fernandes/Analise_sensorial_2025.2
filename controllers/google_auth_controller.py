@@ -27,6 +27,11 @@ def google_login():
             'access_type': 'offline',
             'prompt': 'select_account'
         }
+
+         # Verifica se alguma variável está faltando
+        for key, val in params.items():
+            if not val:
+                raise ValueError(f"⚠️ Parâmetro obrigatório ausente: {key}")
         
         # Gerar state para segurança
         state = secrets.token_urlsafe(16)

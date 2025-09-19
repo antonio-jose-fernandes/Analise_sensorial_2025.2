@@ -324,3 +324,35 @@ def criar_avaliacoes_banco(permutacoes, qtdTotalAvaliacoes, qtdAmostras):
 def gerar_pdf_distribuicao_avaliacao(id):
     return redirect(url_for('gerar_pdf_distribuicao_avaliacao', analise_id=id))
 
+
+# Lista análises em andamento com suas amostras e quantidade de avaliações feitas
+@app.route("/analise/extrair", methods=['GET'])
+def extrair_dados_analise_professor():
+    db = SessionLocal()
+    try:
+        analises = (
+            db.query(Analise)
+            .join(Analise.amostras)
+            .filter(Analise.status == 'Em andamento')
+            .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
+            .order_by(desc(Analise.id))
+            .all()
+        )
+
+        for analise in analises:
+            analise.quantidade_amostras = len(analise.amostras)
+
+            testadores_unicos = (
+                db.query(Avaliacao.testador_id)
+                .join(Avaliacao.amostra)
+                .filter(Amostra.analise_id == analise.id, Avaliacao.testador_id != None)
+                .distinct()
+                .count()
+            )
+
+            analise.quantidade_avaliacoes = testadores_unicos
+
+        return render_template("/analises/extrair_dados_analise.html", analises=analises)
+    finally:
+        db.close()
+

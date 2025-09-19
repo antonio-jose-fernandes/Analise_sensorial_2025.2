@@ -33,9 +33,8 @@
           <h2>{{ analise.produto }}</h2>
           <div class="row">
             <div class="col-md-4"><p><strong>Responsável:</strong> {{ analise.responsavel.nome if analise.responsavel else 'Nenhum' }}</p></div>
-            <div class="col-md-4"><p><strong>Data:</strong> {{ analise.data }}</p></div>
+            <div class="col-md-4"><p><strong>Data:</strong> {{  analise.data[8:10] }}/{{ analise.data[5:7] }}/{{ analise.data[0:4] }}</p></div>
             <div class="col-md-4"><p><strong>Status:</strong> {{ analise.status }}</p></div>
-            <div class="col-md-4"><p><strong>Teste:</strong> {{ analise.teste }}</p></div>
             <div class="col-md-4">
               {% if analise.justificativa %}
                 <p><strong>Justificativa:</strong> {{ analise.justificativa }}</p>

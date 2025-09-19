@@ -22,3 +22,5 @@ flask-login
 requests
 scipy
 statsmodels
+qrcode
+dotenv
