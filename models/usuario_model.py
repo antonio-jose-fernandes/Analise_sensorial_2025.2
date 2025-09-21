@@ -13,7 +13,7 @@ class Usuario(Base):
     telefone = Column(String(15))
     data_nascimento = Column(Date)
     login = Column(String(200))
-    senha = Column(String(15))
+    senha = Column(String(255)) # Aumentei o tamanho
     tipo = Column(String(20))  # Pode ser "aluno" ou "professor"
     ativo = Column(String(10), default="Ativo")  # Mudando para String com valores "Ativo" ou "Inativo"
     analises_responsavel = relationship("Analise", back_populates="responsavel")

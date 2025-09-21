@@ -45,12 +45,13 @@
             background-color: #218838;
         }
     </style>
-<link rel="icon" href="../static/assets/icon/logo.ico" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='assets/icon/logo.ico') }}" type="image/x-icon">
+
 </head>
 <body>
 
     <div class="container">
-        <h2><img src="IFCE.png" alt=""></h2>
+        <h2><img src="{{ url_for('static', filename='assets/icon/logoifce.png') }}" alt="IFCE" style="width:300px; height:auto"></h2>
         <h2>Termo de Consentimento
             <p>Análise Sensorial</p>
         </h2>
@@ -59,7 +60,7 @@
             <p>
                 <strong> <p>TERMO DE CONSENTIMENTO LIVRE E ESCLARECIDO</p></strong>
 
-                AVALIAÇÃO SENSORIAL DE BISCOITO DE CHOCOLATE TIPO COOKIE SEM GLÚTEN ADICIONADO DE FARINHAS DE AMARANTO E ARROZ
+                AVALIAÇÃO SENSORIAL DE {{produto}} 
                 <strong><p>Profa: Dra. Masu Capistrano Camurça Portela</p></strong>
             </p>
             <p>
@@ -72,7 +73,7 @@
             <p>Devido à doença, um dos principais problemas que o consumidor celíaco enfrenta é na disponibilidade e qualidade de alimentos sem glúten, com custo que se enquadre na renda familiar e que apresentem características sensoriais agradáveis.
                 Por isso, o aproveitamento de produtos derivados de arroz e amaranto na alimentação humana, agregando o sabor do chocolate através da incorporação destes em formulações de biscoitos, é uma excelente estratégia para aumentar o valor nutricional e conferir características funcionais aos produtos isentos em glúten, sem agregar valores elevados no produto final.</p>
             <p><strong>Procedimentos:</strong></p>
-            <p>Participando do estudo você está sendo convidado a: realizar análise sensorial de Biscoito de Chocolate tipo cookie sem glúten adicionado de Farinhas de Arroz e Amaranto e preenchimento de formulário. Sua avaliação sensorial tem um tempo estimado de 10 minutos. O teste será aplicado nesta instituição e não será necessário deslocamento. Não será necessário a sua participação de outras vezes.</p>
+            <p>Participando do estudo você está sendo convidado a: realizar análise sensorial de {{produto}} e preenchimento de formulário. Sua avaliação sensorial tem um tempo estimado de 10 minutos. O teste será aplicado nesta instituição e não será necessário deslocamento. Não será necessário a sua participação de outras vezes.</p>
             <p><strong>Desconfortos e riscos:</strong></p>
             <p>Você <strong>n͟ã͟o͟</strong> deve participar deste estudo caso venha a ter alguma alergia ou rejeição a algum dos componentes do alimento anteriormente informados. Serão excluídos avaliadores que não concordarem com o TCLE de acordo com a resolução nº 466, de 12 de dezembro de 2012 e que durante a seleção prévia à análise sensorial, relatarem histórico de alergia ou intolerância a algum ingrediente presente nos produtos testados ou que desconhecem que possuem algum tipo de alergia ou intolerância a algum dos ingredientes da fórmula.
                 Os riscos presentes para o participante são baixos desde que o participante não apresente nenhum problema de alergia ou intolerância alimentar a qualquer componente da formulação, e se este for detectado, o participante terá todo o auxílio, tanto médico, psicológico e moral quanto financeiro, ficando o responsável pela pesquisa encarregado de acompanhar todo o processo. Você não deve participar deste estudo se estiver impossibilitado de seguir as orientações expressas nesse documento.</p>
@@ -109,7 +110,7 @@
     <script>
         function aceitarTermo() {
             alert("Tem certeza?");
-            window.location.href = "{{ url_for('formulario_analise', id=id) }}";
+            window.location.href = "{{ url_for('iniciar_avaliacao', id=id) }}";
         }
     </script>
 

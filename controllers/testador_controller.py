@@ -19,6 +19,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Rota para exibir o formulário sensorial
 @app.route('/avaliacao/<int:id>', methods=['GET'])
 def formulario_analise(id):
+
+    if not session.get('google_authenticated'):
+        flash("Sessão expirada. Obrigado por participar!", "info")
+        return redirect(url_for('agradecimento'))
+    
+
     db = SessionLocal()
     try:
         analise = db.query(Analise).filter_by(id=id).first()
@@ -46,7 +52,7 @@ def formulario_analise(id):
 @app.route('/pdf_qrcode/<int:id>')
 def pdf_qrcode(id):
     # URL que o QR Code vai abrir
-    url = url_for('formulario_analise', id=id, _external=True)
+    url = url_for('termo', id=id, _external=True)
 
     # Gerar QR Code
     qr = qrcode.QRCode(box_size=10, border=4)
@@ -101,6 +107,8 @@ def pdf_qrcode(id):
 # Rota intermediária para login do Google
 @app.route('/iniciar_avaliacao/<int:id>', methods=['GET'])
 def iniciar_avaliacao(id):
+    session.clear()
+
     # Se já estiver autenticado, redireciona direto
     if session.get('google_authenticated'):
         return redirect(url_for('formulario_analise', id=id))
@@ -175,9 +183,9 @@ def salvar_avaliacoes(id):
         
         # Limpar a sessão de autenticação após envio bem-sucedido
         session.pop('google_authenticated', None)
-        session.clear()
         
-        return redirect(url_for('formulario_analise', id=id))
+        
+        return redirect(url_for('logout_avaliador'))
 
     except Exception as e:
         db.rollback()
@@ -186,3 +194,29 @@ def salvar_avaliacoes(id):
 
     finally:
         db.close()
+
+
+
+@app.route("/avaliacao/termo/<int:id>")
+def termo(id):
+        db = SessionLocal()
+        try:
+            analise = db.query(Analise).filter_by(id=id).first()
+            if not analise:
+                return "Análise não encontrada", 404
+
+            produto = analise.produto
+
+            return render_template(
+                "/avaliador/termo.html",
+                produto=produto,
+                id=id
+            )
+        finally:
+            db.close()
+
+    
+
+@app.route('/agradecimento')
+def agradecimento():
+    return render_template("avaliador/agradecimento.html")

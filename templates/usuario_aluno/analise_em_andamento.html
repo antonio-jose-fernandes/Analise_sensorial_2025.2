@@ -64,9 +64,12 @@
                 <td class="d-none d-md-table-cell">{{ analise.quantidade_avaliacoes }}</td>
                 <td class="actions">
                   <div class="d-flex justify-content-center gap-1">
-                    <a href="{{ url_for('formulario_analise', id=analise.id, produto=analise.produto, quantidade_amostras=analise.quantidade_amostras) }}" class="btn btn-sm btn-primary" title="Nova avaliação" target="_blank">
+                    <a href="{{ url_for('termo', id=analise.id) }}" class="btn btn-sm btn-primary" title="Nova avaliação" target="_blank">
                       <i class="fa-regular fa-square-plus"></i>
                     </a>
+                    <!-- <a href="{{ url_for('formulario_analise', id=analise.id, produto=analise.produto, quantidade_amostras=analise.quantidade_amostras) }}" class="btn btn-sm btn-primary" title="Nova avaliação" target="_blank">
+                      <i class="fa-regular fa-square-plus"></i>
+                    </a> -->
                     <a href="{{ url_for('pdf_qrcode', id=analise.id) }}" target="_blank" class="btn btn-sm btn-secondary" title="QR Code">
                       <i class="fa fa-qrcode"></i> QR Code
                     </a>

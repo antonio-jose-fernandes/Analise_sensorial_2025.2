@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request, url_for, session, flash, jsonify
+from flask import Flask, redirect, request, url_for, session, flash, jsonify, render_template
 from urllib.parse import quote
 import secrets
 import requests
@@ -126,7 +126,8 @@ def callback():
 def logout_avaliador():
     session.clear()
     flash("Você foi desconectado com sucesso.", "success")
-    return redirect('/')
+    return redirect(url_for('agradecimento'))
+
 
 @app.route('/api/auth/status')
 def auth_status():

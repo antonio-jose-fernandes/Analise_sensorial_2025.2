@@ -4,10 +4,26 @@ from models.usuario_model import *
 from models.conexao import *
 from datetime import datetime  # Para converter a data corretamente
 from sqlalchemy.orm import sessionmaker  # Importação da sessionmaker
+from werkzeug.security import generate_password_hash, check_password_hash
+
 import re
 
 # Criando a sessão para interagir com o banco de dados
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def formatar_telefone(telefone):
+    if not telefone:
+        return ""
+    telefone = re.sub(r'\D', '', telefone)  # garante só dígitos
+    if len(telefone) == 11:
+        return f"({telefone[:2]}) {telefone[2:7]}-{telefone[7:]}"
+    elif len(telefone) == 10:
+        return f"({telefone[:2]}) {telefone[2:6]}-{telefone[6:]}"
+    return telefone  # se não bater, retorna como está
+
+# registrar no Jinja
+app.jinja_env.filters['telefone'] = formatar_telefone
 
 
 @app.route("/", methods=['GET'])
@@ -22,11 +38,10 @@ def admin():
     db = SessionLocal()
     usuarioLogado = db.query(Usuario).filter(
         Usuario.login == login,
-        Usuario.senha == senha,
         Usuario.ativo == 'Ativo'
     ).first()
 
-    if usuarioLogado:
+    if usuarioLogado and check_password_hash(usuarioLogado.senha, senha):
         if usuarioLogado.tipo == 'professor':
             return render_template("/professor/painel_admin.html")
         else:
@@ -56,8 +71,11 @@ def create():
         senha = request.form['senha']
         tipo = request.form['tipo']
 
+        # Limpa tudo que não for número
+        telefone_limpo = re.sub(r'\D', '', telefone)
+
         # Validação do telefone (somente números com 10 ou 11 dígitos)
-        if not re.match(r'^\d{10,11}$', telefone):
+        if not re.match(r'^\d{10,11}$', telefone_limpo):
             flash("Telefone inválido. Use apenas números com DDD (10 ou 11 dígitos).")
             return redirect(url_for('cad_inserir'))
 
@@ -68,13 +86,14 @@ def create():
             flash("Data de nascimento inválida.")
             return redirect(url_for('cad_inserir'))
 
+        senha_hash = generate_password_hash(senha)  
         # Cria um novo cadastro
         new_usuario = Usuario(
             nome=nome,
             email=email,
-            telefone=telefone,
+            telefone=telefone_limpo,
             login=login,
-            senha=senha,
+            senha=senha_hash,
             tipo=tipo,
             data_nascimento=data_nascimento,
             ativo='Ativo'  # Definindo o status como ativo por padrão
@@ -123,15 +142,22 @@ def update(id):
 
         # Validação do telefone (somente números com 10 ou 11 dígitos)
         telefone = request.form['telefone']
-        if not re.match(r'^\d{10,11}$', telefone):
+        telefone_limpo = re.sub(r'\D', '', telefone)
+
+        if not re.match(r'^\d{10,11}$', telefone_limpo):
             flash("Telefone inválido.")
             db.close()
             return redirect(url_for('editar', id=cadastro.id))
 
-        cadastro.telefone = telefone
+        cadastro.telefone = telefone_limpo  
         cadastro.data_nascimento = datetime.strptime(request.form['data_nascimento'], '%Y-%m-%d').date()
         cadastro.login = request.form['login']
-        cadastro.senha = request.form['senha']
+
+        # Atualiza a senha somente se o campo não estiver vazio
+        nova_senha = request.form['senha']
+        if nova_senha.strip():
+            cadastro.senha = generate_password_hash(nova_senha)
+
         cadastro.tipo = request.form['tipo']
         cadastro.ativo = request.form['ativo']  # Atualizando o status de Ativo/Inativo
 
