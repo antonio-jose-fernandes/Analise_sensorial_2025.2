@@ -37,8 +37,7 @@
                 <th>#</th>
                 <th>Nome</th>
                 <th>Email</th>
-                <th class="d-none d-md-table-cell">Telefone</th>
-                <th class="d-none d-md-table-cell">Data de Nascimento</th>
+                <th class="d-none d-md-table-cell">Telefone</th>               
                 <th class="d-none d-md-table-cell">Login</th>
                 <th>Tipo</th>
                 <th>Status</th>
@@ -51,8 +50,7 @@
                 <td>{{ loop.index }}</td>
                 <td>{{ cadastro.nome }}</td>
                 <td>{{ cadastro.email }}</td>
-                <td class="d-none d-md-table-cell">{{ cadastro.telefone | telefone }}</td>
-                <td class="d-none d-md-table-cell">{{ cadastro.data_nascimento }}</td>
+                <td class="d-none d-md-table-cell">{{ cadastro.telefone | telefone }}</td>              
                 <td class="d-none d-md-table-cell">{{ cadastro.login }}</td>
                 <td class="text-capitalize">{{ cadastro.tipo }}</td>
                 <td>
