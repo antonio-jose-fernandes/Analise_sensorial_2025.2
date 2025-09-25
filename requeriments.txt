@@ -24,3 +24,4 @@ scipy
 statsmodels
 qrcode
 dotenv
+cryptography

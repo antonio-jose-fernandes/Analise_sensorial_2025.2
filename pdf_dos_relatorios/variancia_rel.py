@@ -194,12 +194,16 @@ def gerar_pdf_variancia(analise_id):
 
         # Montar tabela ANOVA
         dados_anova = [
-            ["Causas de Variação (C.V)", "G.L.", "S.Q.", "Q.M.", "F", "p-valor"],
-            ["Amostras", GL_amostra, round(SQ_amostra, 2), round(QM_amostra, 2), round(F_amostra, 3), f"{p_amostra:.4f}"],
-            ["Avaliadores", GL_avaliador, round(SQ_avaliador, 2), round(QM_avaliador, 2), round(F_avaliador, 3), f"{p_avaliador:.4f}"],
-            ["Resíduo", GL_erro, round(SQ_erro, 2), round(QM_erro, 2), "", ""],
-            ["Total", GL_total, round(SQ_total, 2), "", "", ""],
+            ["Causas de Variação (C.V)", "G.L.", "S.Q.", "Q.M.", "F"],
+            ["Amostras", GL_amostra, round(SQ_amostra, 2), round(QM_amostra, 2), round(F_amostra, 3)],
+            ["Avaliadores", GL_avaliador, round(SQ_avaliador, 2), round(QM_avaliador, 2), round(F_avaliador, 3)],
+            ["Resíduo", GL_erro, round(SQ_erro, 2), round(QM_erro, 2), ""],
+            ["Total", GL_total, round(SQ_total, 2), "", ""],
         ]
+
+
+       #dados_anova.append(["dados conferencia", medias_avaliador, media_geral, SQ_avaliador,df.groupby("avaliador").size()])
+
 
         tabela_anova = Table(dados_anova, colWidths=[120, 40, 70, 70, 50, 60])
         tabela_anova.setStyle(TableStyle(estilo_base))
