@@ -63,12 +63,12 @@
     
     <h2 class="login-title">Login</h2>
     {% with mensagens = get_flashed_messages(with_categories=true) %}
-  {% if mensagens %}
-    {% for categoria, mensagem in mensagens %}
-      <div class="alert alert-{{ categoria }}">{{ mensagem }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %} 
+      {% if mensagens %}
+        {% for categoria, mensagem in mensagens %}
+          <div class="alert alert-{{ categoria }}">{{ mensagem }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %} 
 {% for usuario in usuarios %}
   <li>{{ usuario.nome }} - {{ usuario.email }}</li>
 {% endfor %}

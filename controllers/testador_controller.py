@@ -155,6 +155,12 @@ def salvar_avaliacoes(id):
             amostras_validas.append((i, avaliacao))
             i += 1
 
+        # Verificar se todas têm o mesmo numero_controle
+        numeros_controle = {avaliacao.numero_controle for _, avaliacao in amostras_validas}
+        if len(numeros_controle) > 1:
+            flash("Erro: Você preencheu amostras de conjuntos diferentes. Preencha apenas com amostras do mesmo conjunto.", "error")
+            return redirect(url_for('formulario_analise', id=id))
+
         # 2. Se todas as amostras são válidas, salvar o testador
         testador = Testador(
             nome=request.form.get("nome"),
@@ -179,7 +185,7 @@ def salvar_avaliacoes(id):
             db.add(avaliacao)
 
         db.commit()
-        flash("Avaliação salva com sucesso!", "success")
+        #flash("Avaliação salva com sucesso!", "success")
         
         # Limpar a sessão de autenticação após envio bem-sucedido
         session.pop('google_authenticated', None)

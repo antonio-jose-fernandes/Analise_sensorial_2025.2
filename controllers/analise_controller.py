@@ -1,5 +1,7 @@
 from main import app
 from flask import request, render_template, redirect, url_for, flash, session
+from flask_login import login_required
+from utils.decorators import role_required
 from models.analise_model import Analise
 from models.amostra_model import Amostra
 from models.usuario_model import Usuario
@@ -17,6 +19,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 @app.route("/analise/list", methods=['GET'])
+@login_required
+@role_required("professor")
 def lista_analises():
     db = SessionLocal()
     try:
@@ -35,6 +39,8 @@ def lista_analises():
 
 
 @app.route("/analise/cadastro", methods=['GET'])
+@login_required
+@role_required("professor")
 def form_analise():
     db = SessionLocal()
     professores = db.query(Usuario).filter_by(tipo="professor", ativo="Ativo").all()
@@ -43,6 +49,8 @@ def form_analise():
 
 
 @app.route("/analise/nova", methods=['POST'])
+@login_required
+@role_required("professor")
 def nova_analise():
     if request.method == 'POST':
         produto = request.form['produto']
@@ -84,6 +92,8 @@ def nova_analise():
 
 
 @app.route("/analise/<int:id>/detalhes", methods=['GET'])
+@login_required
+@role_required("professor")
 def detalhes_analise(id):
     db = SessionLocal()
     try:
@@ -114,6 +124,8 @@ def detalhes_analise(id):
 
 
 @app.route("/analise/<int:id>/editar", methods=['GET'])
+@login_required
+@role_required("professor")
 def form_editar_analise(id):
     db = SessionLocal()
     analise = db.query(Analise).filter_by(id=id).first()
@@ -129,6 +141,8 @@ def form_editar_analise(id):
 
 
 @app.route("/analise/<int:id>/editar", methods=['POST'])
+@login_required
+@role_required("professor")
 def editar_analise(id):
     db = SessionLocal()
     analise = db.query(Analise).filter_by(id=id).first()
@@ -163,6 +177,8 @@ def editar_analise(id):
 
 
 @app.route("/analise/<int:id>/excluir", methods=['GET'])
+@login_required
+@role_required("professor")
 def excluir_analise(id):
     db = SessionLocal()
     analise = db.query(Analise).filter_by(id=id).first()
@@ -184,6 +200,8 @@ def excluir_analise(id):
 
 
 @app.route("/analise/<int:id>/adicionar_participante", methods=['POST'])
+@login_required
+@role_required("professor")
 def adicionar_participante(id):
     db = SessionLocal()
     try:
@@ -219,6 +237,8 @@ def adicionar_participante(id):
 
 
 @app.route("/analise/<int:id>/remover_participante", methods=['POST'])
+@login_required
+@role_required("professor")
 def remover_participante(id):
     db = SessionLocal()
     try:
@@ -254,6 +274,8 @@ def remover_participante(id):
 
 
 @app.route("/analise/avaliacoes/<int:id>", methods=['GET'])
+@login_required
+@role_required("professor")
 def visualizar_distribuicao_avaliacoes(id):
     db = SessionLocal()
     try:
@@ -327,6 +349,8 @@ def gerar_pdf_distribuicao_avaliacao(id):
 
 # Lista análises em andamento com suas amostras e quantidade de avaliações feitas
 @app.route("/analise/extrair", methods=['GET'])
+@login_required
+@role_required("professor")
 def extrair_dados_analise_professor():
     db = SessionLocal()
     try:

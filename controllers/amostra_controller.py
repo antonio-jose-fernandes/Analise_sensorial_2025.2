@@ -1,5 +1,7 @@
 from main import app
 from flask import request, render_template, redirect, url_for, flash
+from flask_login import login_required
+from utils.decorators import role_required
 from models.amostra_model import Amostra
 from models.analise_model import Analise
 from models.conexao import *
@@ -9,6 +11,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 @app.route("/analise/<int:id>/detalhes", methods=['GET'])
+@login_required
+@role_required("professor")
 def detalhe_analise(id):
     db = SessionLocal()
     analise = db.query(Analise).filter_by(id=id).first()
@@ -23,6 +27,8 @@ def detalhe_analise(id):
 
 
 @app.route("/analise/<int:id>/amostras", methods=['GET'])
+@login_required
+@role_required("professor")
 def lista_amostras(id):
     db = SessionLocal()
     amostras = db.query(Amostra).filter_by(analise_id=id).all()
@@ -31,6 +37,8 @@ def lista_amostras(id):
 
 
 @app.route("/analise/<int:id>/nova_amostra", methods=['GET', 'POST'])
+@login_required
+@role_required("professor")
 def nova_amostra(id):
     if request.method == 'POST':
         descricao = request.form['descricao']
@@ -48,6 +56,8 @@ def nova_amostra(id):
 
 
 @app.route("/analise/<int:id>/amostra/<int:amostra_id>/editar", methods=['GET'])
+@login_required
+@role_required("professor")
 def form_editar_amostra(id, amostra_id):
     db = SessionLocal()
     amostra = db.query(Amostra).filter_by(id=amostra_id, analise_id=id).first()
@@ -61,6 +71,8 @@ def form_editar_amostra(id, amostra_id):
 
 
 @app.route("/analise/<int:id>/amostra/<int:amostra_id>/editar", methods=['POST'])
+@login_required
+@role_required("professor")
 def editar_amostra(id, amostra_id):
     db = SessionLocal()
     amostra = db.query(Amostra).filter_by(id=amostra_id, analise_id=id).first()
@@ -78,6 +90,8 @@ def editar_amostra(id, amostra_id):
 
 
 @app.route("/analise/<int:id>/amostra/<int:amostra_id>/excluir", methods=['GET'])
+@login_required
+@role_required("professor")
 def excluir_amostra(id, amostra_id):
     db = SessionLocal()
     amostra = db.query(Amostra).filter_by(id=amostra_id, analise_id=id).first()

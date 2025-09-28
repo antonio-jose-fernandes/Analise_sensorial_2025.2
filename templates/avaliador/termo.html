@@ -91,16 +91,14 @@
             <p>Em caso de dúvidas sobre a pesquisa, você poderá entrar em contato com a pesquisadora Profa. Dra. Masu Capistrano Camurça Portela, IFCE Eixo Produção Alimentícia - Av. Dr. Guarani, 317, Derby Club, Sobral – CE, 62042-030; fone 88 9 9962-2910 e-mail: masu.portela@ifce.edu.br.</p>
             <p><strong>Consentimento livre e esclarecido:</strong></p>
             <p>Após ter recebido esclarecimentos sobre a natureza da pesquisa, seus objetivos, métodos, benefícios previstos, potenciais riscos e o incômodo que esta possa acarretar, aceito participar e declaro estar recebendo uma via original deste documento assinada pelo pesquisador e por mim, tendo todas as folhas por nós rubricadas:
-                <p>Nome do(a) participante: _______________</p>
-                <p>Contato telefônico (opcional): _______________</p>
-                <p>E-mail (opcional): _______________</p>
-                <p>Data: ____/____/_____</p>
+                
+                <p>Data: <span id="dataAtual"></span></p>
             </p>
             <p><strong>Responsabilidade do Pesquisador:</strong></p>
             <p>Asseguro ter cumprido as exigências da resolução 466/2012 CNS/MS e complementares na elaboração do protocolo e na obtenção deste Termo de Consentimento Livre e Esclarecido. Asseguro, também, ter explicado e fornecido uma via deste documento ao participante. Informo que o estudo foi aprovado pelo CEP e pela CONEP, quando pertinente, perante o qual o projeto foi apresentado. Comprometo-me a utilizar o material e os dados obtidos nesta pesquisa exclusivamente para as finalidades previstas neste documento ou conforme o consentimento dado pelo participante.
                 <p>Nome da pesquisadora: Dra. Masu Capistrano Camurça Portela</p>
                 <p>Assinatura da pesquisadora: __________________</p>
-                <p>Data: ____/____/_____</p>
+                
             </p>
         </div>
 
@@ -109,9 +107,20 @@
 
     <script>
         function aceitarTermo() {
-            alert("Tem certeza?");
-            window.location.href = "{{ url_for('iniciar_avaliacao', id=id) }}";
+            if (confirm("Tem certeza?")) {
+                window.location.href = "{{ url_for('iniciar_avaliacao', id=id) }}";
         }
+}
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const hoje = new Date();
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const ano = hoje.getFullYear();
+
+            const dataFormatada = `${dia}/${mes}/${ano}`;
+            document.getElementById("dataAtual").textContent = dataFormatada;
+        });
     </script>
 
 </body>

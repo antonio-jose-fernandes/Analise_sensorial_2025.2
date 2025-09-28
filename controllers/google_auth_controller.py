@@ -124,8 +124,8 @@ def callback():
 
 @app.route('/logout/avaliador')
 def logout_avaliador():
-    session.clear()
-    flash("Você foi desconectado com sucesso.", "success")
+    #session.clear()
+    #flash("Você foi desconectado com sucesso.", "success")
     return redirect(url_for('agradecimento'))
 
 

@@ -1,5 +1,8 @@
 from main import app
+from functools import wraps
+from flask import abort
 from flask import request, render_template, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required
 from models.usuario_model import *
 from models.conexao import *
 from datetime import datetime  # Para converter a data corretamente
@@ -26,30 +29,43 @@ def formatar_telefone(telefone):
 app.jinja_env.filters['telefone'] = formatar_telefone
 
 
+
+
 @app.route("/", methods=['GET'])
 def login():
     return render_template("/login.html")
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("Logout realizado com sucesso!", "success")
+    return redirect(url_for("login"))
 
 @app.route("/admin", methods=['POST'])
 def admin():
     login = request.form['username']
     senha = request.form['password']
     db = SessionLocal()
-    usuarioLogado = db.query(Usuario).filter(
-        Usuario.login == login,
-        Usuario.ativo == 'Ativo'
-    ).first()
+    try:
+        usuarioLogado = db.query(Usuario).filter(
+            Usuario.login == login,
+            Usuario.ativo == 'Ativo'
+        ).first()
 
-    if usuarioLogado and check_password_hash(usuarioLogado.senha, senha):
-        if usuarioLogado.tipo == 'professor':
-            return render_template("/professor/painel_admin.html")
-        else:
-            return redirect(url_for('aluno_dashboard'))
-           # return render_template("/usuario_aluno/dashboard_atualizado.html")
+        if usuarioLogado and check_password_hash(usuarioLogado.senha, senha):
+            login_user(usuarioLogado)
+            
+            if usuarioLogado.tipo == 'professor':
+                return render_template("/professor/painel_admin.html")
+            else:
+                return redirect(url_for('aluno_dashboard'))
+            # return render_template("/usuario_aluno/dashboard_atualizado.html")
 
-    flash('Login ou senha inválido')
-    return redirect("/")
+        flash("Login e/ou senha inválidos", "danger")
+        return redirect(url_for("login"))
+    finally:
+        db.close()
 
 
 # Rota para exibir o formulário de cadastro
@@ -87,6 +103,25 @@ def create():
             return redirect(url_for('cad_inserir'))
 
         senha_hash = generate_password_hash(senha)  
+
+
+        # Cria uma nova sessão para o banco de dados
+        db = SessionLocal()
+
+        # 🚨 Verifica se já existe login
+        usuario_existente = db.query(Usuario).filter_by(login=login).first()
+        if usuario_existente:
+            flash("Já existe um usuário com este login. Escolha outro.", "warning")
+            db.close()
+            return redirect(url_for('cad_inserir'))
+
+        # 🚨 Opcional: também impedir duplicação de email
+        email_existente = db.query(Usuario).filter_by(email=email).first()
+        if email_existente:
+            flash("Já existe um usuário com este e-mail.", "warning")
+            db.close()
+            return redirect(url_for('cad_inserir'))
+
         # Cria um novo cadastro
         new_usuario = Usuario(
             nome=nome,
@@ -99,8 +134,7 @@ def create():
             ativo='Ativo'  # Definindo o status como ativo por padrão
         )
 
-        # Cria uma nova sessão para o banco de dados
-        db = SessionLocal()
+        
 
         # Adiciona o novo cadastro ao banco de dados
         db.add(new_usuario)
@@ -139,19 +173,45 @@ def update(id):
     if cadastro:
         cadastro.nome = request.form['nome']
         cadastro.email = request.form['email']
+        cadastro.login = request.form['login']
 
+        email = request.form['email']   # <-- agora a variável existe
+        login = request.form['login']   # <-- idem
+        
+        # Verifica duplicidade de login (exceto o atual)
+        login_existente = (
+            db.query(Usuario)
+            .filter(Usuario.login == login, Usuario.id != id)
+            .first()
+        )
+        if login_existente:
+            flash("Já existe um usuário com este login.", "warning")
+            db.close()
+            return redirect(url_for('editar', id=id))
+
+        # Verifica duplicidade de e-mail (exceto o atual)
+        email_existente = (
+            db.query(Usuario)
+            .filter(Usuario.email == email, Usuario.id != id)
+            .first()
+        )
+        if email_existente:
+            flash("Já existe um usuário com este e-mail.", "warning")
+            db.close()
+            return redirect(url_for('editar', id=id))
+        
         # Validação do telefone (somente números com 10 ou 11 dígitos)
         telefone = request.form['telefone']
         telefone_limpo = re.sub(r'\D', '', telefone)
 
         if not re.match(r'^\d{10,11}$', telefone_limpo):
-            flash("Telefone inválido.")
+            flash("Telefone inválido.", "warning")
             db.close()
             return redirect(url_for('editar', id=cadastro.id))
 
         cadastro.telefone = telefone_limpo  
         cadastro.data_nascimento = datetime.strptime(request.form['data_nascimento'], '%Y-%m-%d').date()
-        cadastro.login = request.form['login']
+        
 
         # Atualiza a senha somente se o campo não estiver vazio
         nova_senha = request.form['senha']

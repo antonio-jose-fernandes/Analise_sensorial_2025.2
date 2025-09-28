@@ -1,9 +1,10 @@
 from sqlalchemy import Boolean, Column, Integer, String, Date
+from flask_login import UserMixin
 from sqlalchemy.orm import relationship
 from models.conexao import Base, engine  # Certifique-se de que a conexão com o banco está correta
 from models.associacoes import analise_usuario
 
-class Usuario(Base):
+class Usuario(Base, UserMixin):
     __tablename__ = "usuarios"
 
     # Definindo a chave primária com autoincremento

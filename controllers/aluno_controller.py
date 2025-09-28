@@ -1,8 +1,11 @@
 from sqlalchemy import desc
 from main import app
 from flask import redirect
+from flask_login import login_required, current_user
+from utils.decorators import role_required
 from flask import request, render_template, redirect, url_for, flash, session
 from models.analise_model import *
+from models.usuario_model import *
 from models.amostra_model import *
 from models.avaliacao_modal import *
 from models.conexao import *
@@ -15,12 +18,15 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Lista análises em andamento com suas amostras e quantidade de avaliações feitas
 @app.route("/aluno/analise/andamento", methods=['GET'])
+@login_required
+@role_required("aluno")
 def lista_analises_andamento():
     db = SessionLocal()
     try:
         analises = (
             db.query(Analise)
-            .join(Analise.amostras)
+            .join(Analise.participantes)  # Join com tabela analise_usuario
+            .filter(Usuario.id == current_user.id)  # Apenas as do usuário logado
             .filter(Analise.status == 'Em andamento')
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
             .order_by(desc(Analise.id))
@@ -46,23 +52,29 @@ def lista_analises_andamento():
 
 
 # Página inicial do aluno
+
 @app.route("/aluno", methods=['GET'])
+@login_required
+@role_required("aluno")
 def aluno():
     return render_template("/aluno/painel_aluno.html")
 
 # Dashboard do aluno com lista de análises
+
 @app.route("/aluno/dashboard", methods=['GET'])
+@login_required
+@role_required("aluno")
 def aluno_dashboard():
    # return redirect(url_for('dashboard'))    
     db = SessionLocal()
     try:        
         analises = (
             db.query(Analise)
-            .join(Analise.amostras)
+            .join(Analise.participantes)  # faz o join com a tabela analise_usuario
+            .filter_by(id=current_user.id)  # filtra pelo usuário logado
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
-            .group_by(Analise.id)
             .order_by(desc(Analise.id))
-            .all()    )
+            .all())
         
         medias_avaliacores ={}
 
@@ -113,6 +125,8 @@ def aluno_dashboard():
 
 # Rota simples para tela de análise do aluno
 @app.route("/aluno/analise", methods=['GET'])
+@login_required
+@role_required("aluno")
 def aluno_analise():
     return render_template("/usuario_aluno/analise.html")
 
@@ -121,12 +135,15 @@ def aluno_analise():
 
 # Lista análises em andamento com suas amostras e quantidade de avaliações feitas
 @app.route("/aluno/analise/extrair", methods=['GET'])
+@login_required
+@role_required("aluno")
 def extrair_dados_analise():
     db = SessionLocal()
     try:
         analises = (
             db.query(Analise)
-            .join(Analise.amostras)
+            .join(Analise.participantes)  # Join com a tabela analise_usuario
+            .filter(Usuario.id == current_user.id)  # Apenas análises do aluno logado
             .filter(Analise.status == 'Em andamento')
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
             .order_by(desc(Analise.id))
@@ -155,6 +172,8 @@ def extrair_dados_analise():
 
 # Rota de teste que aponta para dashboard
 @app.route("/teste", methods=['GET'])
+@login_required
+@role_required("aluno")
 def teste():
     return render_template("/usuario_aluno/dashboard.html")
 
