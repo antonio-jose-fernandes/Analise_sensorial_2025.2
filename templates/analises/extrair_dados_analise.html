@@ -104,7 +104,7 @@
                 <td>{{ analise.produto }}</td>
                 <td>{{ analise.status }}</td>
                 <td class="d-none d-md-table-cell">{{ analise.responsavel.nome if analise.responsavel else 'Nenhum' }}</td>
-                <td class="d-none d-md-table-cell">{{ analise.data }}</td>
+                <td class="d-none d-md-table-cell">{{  analise.data[8:10] }}/{{ analise.data[5:7] }}/{{ analise.data[0:4] }}</td>
                 <td class="d-none d-md-table-cell">{{ analise.quantidade_avaliacoes }}</td>
                 <td class="actions">
                    <div class="d-flex justify-content-center gap-1">
