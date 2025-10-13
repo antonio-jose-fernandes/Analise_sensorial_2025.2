@@ -19,20 +19,28 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Lista análises em andamento com suas amostras e quantidade de avaliações feitas
 @app.route("/aluno/analise/andamento", methods=['GET'])
 @login_required
-@role_required("aluno")
+@role_required(["admin", "aluno"])
 def lista_analises_andamento():
     db = SessionLocal()
     try:
-        analises = (
+        # Captura a página atual (padrão = 1)
+        page = request.args.get("page", 1, type=int)
+        per_page = 10  # número de registros por página
+
+        # Consulta total de análises
+        query = (
             db.query(Analise)
-            .join(Analise.participantes)  # Join com tabela analise_usuario
-            .filter(Usuario.id == current_user.id)  # Apenas as do usuário logado
+            .join(Analise.participantes)
+            .filter(Usuario.id == current_user.id)
             .filter(Analise.status == 'Em andamento')
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
             .order_by(desc(Analise.id))
-            .all()
         )
 
+        total = query.count()  # total de registros
+        analises = query.offset((page - 1) * per_page).limit(per_page).all()
+
+        # Processa as informações adicionais
         for analise in analises:
             analise.quantidade_amostras = len(analise.amostras)
 
@@ -43,13 +51,20 @@ def lista_analises_andamento():
                 .distinct()
                 .count()
             )
-
             analise.quantidade_avaliacoes = testadores_unicos
 
-        return render_template("/usuario_aluno/analise_em_andamento.html", analises=analises)
+        # Calcula páginas totais
+        total_pages = (total + per_page - 1) // per_page
+
+        return render_template(
+            "/usuario_aluno/analise_em_andamento.html",
+            analises=analises,
+            page=page,
+            total_pages=total_pages
+        )
+
     finally:
         db.close()
-
 
 # Página inicial do aluno
 
@@ -140,16 +155,29 @@ def aluno_analise():
 def extrair_dados_analise():
     db = SessionLocal()
     try:
-        analises = (
+        # Obtém o número da página atual da URL (padrão = 1)
+        page = request.args.get('page', 1, type=int)
+        per_page = 10  # número de análises por página
+
+        # Consulta paginada
+        query = (
             db.query(Analise)
             .join(Analise.participantes)  # Join com a tabela analise_usuario
             .filter(Usuario.id == current_user.id)  # Apenas análises do aluno logado
             .filter(Analise.status == 'Em andamento')
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
             .order_by(desc(Analise.id))
-            .all()
         )
 
+        # Conta o total e aplica limites
+        total = query.count()
+        analises = (
+            query.offset((page - 1) * per_page)
+                 .limit(per_page)
+                 .all()
+        )
+
+        # Calcula dados adicionais
         for analise in analises:
             analise.quantidade_amostras = len(analise.amostras)
 
@@ -160,10 +188,17 @@ def extrair_dados_analise():
                 .distinct()
                 .count()
             )
-
             analise.quantidade_avaliacoes = testadores_unicos
 
-        return render_template("/usuario_aluno/extrair_dados_analise.html", analises=analises)
+        # Calcula o total de páginas
+        total_pages = (total + per_page - 1) // per_page
+
+        return render_template(
+            "/usuario_aluno/extrair_dados_analise.html",
+            analises=analises,
+            page=page,
+            total_pages=total_pages
+        )
     finally:
         db.close()
 

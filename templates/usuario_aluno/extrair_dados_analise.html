@@ -1,5 +1,5 @@
 {% extends '/usuario_aluno/menu_user_aluno.html' %}
-
+{% block title %}Extrair dados{% endblock %}
 {% block content %}
 <style>
     body {
@@ -34,6 +34,7 @@
       width: 100% !important;
       height: auto !important;
     }
+    
   </style>
 <header>
     <h1>Lista de Análise Sensorial</h1>
@@ -86,6 +87,28 @@
               {% endfor %}
             </tbody>
           </table>
+          <nav aria-label="Navegação de páginas">
+            <ul class="pagination justify-content-center mt-3">
+
+              <!-- Botão "Anterior" -->
+              <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('extrair_dados_analise', page=page-1) }}" tabindex="-1">Anterior</a>
+              </li>
+
+              <!-- Números das páginas -->
+              {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                  <a class="page-link" href="{{ url_for('extrair_dados_analise', page=p) }}">{{ p }}</a>
+                </li>
+              {% endfor %}
+
+              <!-- Botão "Próxima" -->
+              <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('extrair_dados_analise', page=page+1) }}">Próxima</a>
+              </li>
+
+            </ul>
+          </nav>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ from main import app
 from functools import wraps
 from flask import abort
 from flask import request, render_template, redirect, url_for, flash
+from utils.decorators import role_required
 from flask_login import login_user, logout_user, login_required
 from models.usuario_model import *
 from models.conexao import *
@@ -58,6 +59,8 @@ def admin():
             
             if usuarioLogado.tipo == 'professor':
                 return render_template("/professor/painel_admin.html")
+            elif usuarioLogado.tipo == 'admin':
+                return render_template("/admin/painel_admin.html")
             else:
                 return redirect(url_for('aluno_dashboard'))
             # return render_template("/usuario_aluno/dashboard_atualizado.html")
@@ -70,12 +73,16 @@ def admin():
 
 # Rota para exibir o formulário de cadastro
 @app.route("/usuario/cadastro/inserir", methods=['GET'])
+@login_required
+@role_required(["admin", "professor"])
 def cad_inserir():
     return render_template("/cadastro/aluno_professor.html")
 
 
 # Rota para processar o formulário de cadastro
 @app.route("/usuario/cadastro/inserir/create", methods=['POST'])
+@login_required
+@role_required(["admin", "professor"])
 def create():
     if request.method == 'POST':
         # Captura os dados enviados pelo formulário
@@ -148,11 +155,38 @@ def create():
 
 # Rota para exibir a lista de cadastros
 @app.route("/usuario/cadastro/inserir/list")
+@login_required
+@role_required(["admin", "professor"])
 def lista():
     db = SessionLocal()
-    cadastros = db.query(Usuario).all()
-    db.close()
-    return render_template("/usuario/list_usuario.html", cadastros=cadastros)
+
+    try:
+        # Pegando o número da página via query string (?page=2)
+        page = request.args.get("page", 1, type=int)
+        per_page = 10  # número de registros por página
+
+        # Conta o total
+        total = db.query(Usuario).count()
+
+        # Faz a consulta paginada
+        cadastros = (
+            db.query(Usuario)
+            .order_by(Usuario.id.desc())
+            .offset((page - 1) * per_page)
+            .limit(per_page)
+            .all()
+        )
+
+        total_pages = (total + per_page - 1) // per_page  # cálculo simples de total de páginas
+
+        return render_template(
+            "/usuario/list_usuario.html",
+            cadastros=cadastros,
+            page=page,
+            total_pages=total_pages
+        )
+    finally:
+        db.close()
 
 
 # Rota para exibir o formulário de edição

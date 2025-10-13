@@ -11,7 +11,7 @@ import itertools
 import random
 from models.conexao import *
 from sqlalchemy.orm import sessionmaker, joinedload
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, func
 from sqlalchemy.exc import IntegrityError
 
 # Criando a sessão para interagir com o banco de dados
@@ -24,16 +24,36 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def lista_analises():
     db = SessionLocal()
     try:
+        # 🔹 Pega o número da página da URL (?page=2)
+        page = request.args.get("page", 1, type=int)
+        per_page = 10  # número de análises por página
+
+        # 🔹 Conta o total de análises
+        total = db.query(Analise).count()
+
+        # 🔹 Consulta paginada
         analises = (
             db.query(Analise)
             .options(joinedload(Analise.responsavel))
             .order_by(desc(Analise.id))
+            .offset((page - 1) * per_page)
+            .limit(per_page)
             .all()
         )
-        # Força o carregamento do relacionamento
+
+        # 🔹 Força o carregamento do relacionamento
         for analise in analises:
             _ = analise.responsavel
-        return render_template("/analises/list_analises.html", analises=analises)
+
+        # 🔹 Calcula o total de páginas
+        total_pages = (total + per_page - 1) // per_page
+
+        return render_template(
+            "/analises/list_analises.html",
+            analises=analises,
+            page=page,
+            total_pages=total_pages
+        )
     finally:
         db.close()
 
@@ -354,15 +374,30 @@ def gerar_pdf_distribuicao_avaliacao(id):
 def extrair_dados_analise_professor():
     db = SessionLocal()
     try:
+        # 🔹 Pega o número da página da URL (?page=2)
+        page = request.args.get("page", 1, type=int)
+        per_page = 10  # número de análises por página
+
+        # 🔹 Conta o total de análises em andamento
+        total = (
+            db.query(func.count(Analise.id))
+            .filter(Analise.status == 'Em andamento')
+            .scalar()
+        )
+
+        # 🔹 Busca paginada das análises
         analises = (
             db.query(Analise)
             .join(Analise.amostras)
             .filter(Analise.status == 'Em andamento')
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
             .order_by(desc(Analise.id))
+            .offset((page - 1) * per_page)
+            .limit(per_page)
             .all()
         )
 
+        # 🔹 Processa informações adicionais
         for analise in analises:
             analise.quantidade_amostras = len(analise.amostras)
 
@@ -376,7 +411,16 @@ def extrair_dados_analise_professor():
 
             analise.quantidade_avaliacoes = testadores_unicos
 
-        return render_template("/analises/extrair_dados_analise.html", analises=analises)
+        # 🔹 Calcula o total de páginas
+        total_pages = (total + per_page - 1) // per_page
+
+        # 🔹 Renderiza a página com paginação
+        return render_template(
+            "/analises/extrair_dados_analise.html",
+            analises=analises,
+            page=page,
+            total_pages=total_pages
+        )
+
     finally:
         db.close()
-

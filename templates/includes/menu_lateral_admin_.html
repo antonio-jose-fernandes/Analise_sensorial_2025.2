@@ -1,0 +1,41 @@
+<nav id="sidebar" class="sidebar" aria-label="Menu principal">
+  <div class="sidebar-header">
+    <h4>Painel IFCE</h4>
+  </div>
+  <ul class="nav flex-column">
+    <li>
+      <a href="{{ url_for('admin_dashboard') }}"
+        ><i class="fa-solid fa-chart-simple"></i><span>Dashboard</span></a
+      >
+    </li>
+    <li>
+      <a href="{{ url_for('admin_lista') }}"
+        ><i class="fa-solid fa-users"></i><span>Cadastro de usuários</span></a
+      >
+    </li>
+    <li>
+      <a href="{{ url_for('lista_analises') }}"
+        ><i class="fa-solid fa-chart-line"></i
+        ><span>Cadastro de análises</span></a
+      >
+    </li>
+    <li>
+      <a href="{{ url_for('lista_analises_andamento') }}"
+        ><i class="fa-solid fa-chart-line"></i><span>Realizar Análise</span></a
+      >
+    </li>
+    <li>
+      <a href="{{ url_for('extrair_dados_analise_professor') }}"
+        ><i class="fa-solid fa-file-export"></i><span>Extrair dados</span></a
+      >
+    </li>
+  </ul>
+
+  <div class="logout">
+    <a href="{{ url_for('logout') }}" class="text-center py-3 d-block">
+      <i class="fa-solid fa-sign-out-alt"></i> <span>Sair</span>
+    </a>
+  </div>
+</nav>
+
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>

@@ -281,3 +281,7 @@ form button:hover {
     font-size: 0.9rem;
   }
 }
+.pagination .page-item.active .page-link {
+  background-color: #198754; /* verde do Bootstrap success */
+  border-color: #198754;
+}
