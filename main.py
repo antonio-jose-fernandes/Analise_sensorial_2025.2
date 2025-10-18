@@ -18,7 +18,6 @@ from controllers.usuario_controller import *
 from controllers.analise_controller import *
 from controllers.amostra_controller import *
 from controllers.testador_controller import *
-from controllers.admin_controller import *
 from controllers.google_auth_controller import * 
 from models.usuario_model import *
 from models.testador_modal import *

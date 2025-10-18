@@ -212,10 +212,12 @@ def termo(id):
                 return "Análise não encontrada", 404
 
             produto = analise.produto
+            justificativa = analise.justificativa
 
             return render_template(
                 "/avaliador/termo.html",
                 produto=produto,
+                justificativa=justificativa,
                 id=id
             )
         finally:

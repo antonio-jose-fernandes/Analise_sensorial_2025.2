@@ -1,6 +1,6 @@
 from main import app
-from flask import request, render_template, redirect, url_for, flash, session
-from flask_login import login_required
+from flask import request, render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
 from utils.decorators import role_required
 from models.analise_model import Analise
 from models.amostra_model import Amostra
@@ -11,8 +11,7 @@ import itertools
 import random
 from models.conexao import *
 from sqlalchemy.orm import sessionmaker, joinedload
-from sqlalchemy import select, desc, func
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, desc, func, or_
 
 # Criando a sessão para interagir com o banco de dados
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -24,28 +23,35 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def lista_analises():
     db = SessionLocal()
     try:
-        # 🔹 Pega o número da página da URL (?page=2)
+
         page = request.args.get("page", 1, type=int)
-        per_page = 10  # número de análises por página
+        per_page = 10
 
-        # 🔹 Conta o total de análises
-        total = db.query(Analise).count()
-
-        # 🔹 Consulta paginada
-        analises = (
+        query = (
             db.query(Analise)
+            .outerjoin(Analise.participantes)  # usa outerjoin para incluir as que só têm responsável
+            .filter(
+                or_(
+                    Analise.responsavel_id == current_user.id,  # responsável
+                    Usuario.id == current_user.id               # participante
+                )
+            )
             .options(joinedload(Analise.responsavel))
             .order_by(desc(Analise.id))
+            .distinct()  # evita duplicatas caso o usuário seja responsável e participante
+        )
+
+        total = query.count()
+        analises = (
+            query
             .offset((page - 1) * per_page)
             .limit(per_page)
             .all()
         )
 
-        # 🔹 Força o carregamento do relacionamento
         for analise in analises:
             _ = analise.responsavel
 
-        # 🔹 Calcula o total de páginas
         total_pages = (total + per_page - 1) // per_page
 
         return render_template(
@@ -374,30 +380,45 @@ def gerar_pdf_distribuicao_avaliacao(id):
 def extrair_dados_analise_professor():
     db = SessionLocal()
     try:
-        # 🔹 Pega o número da página da URL (?page=2)
+      
         page = request.args.get("page", 1, type=int)
-        per_page = 10  # número de análises por página
+        per_page = 10
 
-        # 🔹 Conta o total de análises em andamento
+        # Contagem total (apenas análises em andamento e visíveis ao usuário)
         total = (
             db.query(func.count(Analise.id))
-            .filter(Analise.status == 'Em andamento')
+            .outerjoin(Analise.participantes)
+            .filter(
+                Analise.status == 'Em andamento',
+                or_(
+                    Analise.responsavel_id == current_user.id,
+                    Usuario.id == current_user.id
+                )
+            )
+            .distinct()
             .scalar()
         )
 
-        # 🔹 Busca paginada das análises
+        # Consulta principal (paginada)
         analises = (
             db.query(Analise)
-            .join(Analise.amostras)
-            .filter(Analise.status == 'Em andamento')
+            .outerjoin(Analise.participantes)
+            .filter(
+                Analise.status == 'Em andamento',
+                or_(
+                    Analise.responsavel_id == current_user.id,
+                    Usuario.id == current_user.id
+                )
+            )
             .options(joinedload(Analise.responsavel), joinedload(Analise.amostras))
             .order_by(desc(Analise.id))
             .offset((page - 1) * per_page)
             .limit(per_page)
+            .distinct()
             .all()
         )
 
-        # 🔹 Processa informações adicionais
+        # Processa informações adicionais
         for analise in analises:
             analise.quantidade_amostras = len(analise.amostras)
 
@@ -411,10 +432,10 @@ def extrair_dados_analise_professor():
 
             analise.quantidade_avaliacoes = testadores_unicos
 
-        # 🔹 Calcula o total de páginas
+        # Calcula o total de páginas
         total_pages = (total + per_page - 1) // per_page
 
-        # 🔹 Renderiza a página com paginação
+        # Renderiza a página com paginação
         return render_template(
             "/analises/extrair_dados_analise.html",
             analises=analises,
