@@ -51,7 +51,8 @@ def cria_usuario_padrao():
                 login="admin",
                 senha=generate_password_hash("123456"),
                 tipo="professor", 
-                ativo="Ativo"
+                ativo="Ativo",
+                criado_por=None
             )
             db.add(usuario)
             db.commit()

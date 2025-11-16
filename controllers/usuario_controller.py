@@ -3,7 +3,7 @@ from functools import wraps
 from flask import abort
 from flask import request, render_template, redirect, url_for, flash
 from utils.decorators import role_required
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from models.usuario_model import *
 from models.conexao import *
 from datetime import datetime  # Para converter a data corretamente
@@ -74,7 +74,7 @@ def admin():
 # Rota para exibir o formulário de cadastro
 @app.route("/usuario/cadastro/inserir", methods=['GET'])
 @login_required
-@role_required(["admin", "professor"])
+@role_required("professor")
 def cad_inserir():
     return render_template("/cadastro/aluno_professor.html")
 
@@ -82,7 +82,7 @@ def cad_inserir():
 # Rota para processar o formulário de cadastro
 @app.route("/usuario/cadastro/inserir/create", methods=['POST'])
 @login_required
-@role_required(["admin", "professor"])
+@role_required("professor")
 def create():
     if request.method == 'POST':
         # Captura os dados enviados pelo formulário
@@ -138,7 +138,8 @@ def create():
             senha=senha_hash,
             tipo=tipo,
             data_nascimento=data_nascimento,
-            ativo='Ativo'  # Definindo o status como ativo por padrão
+            ativo='Ativo',  # Definindo o status como ativo por padrão
+            criado_por=current_user.id
         )
 
         
@@ -156,7 +157,7 @@ def create():
 # Rota para exibir a lista de cadastros
 @app.route("/usuario/cadastro/inserir/list")
 @login_required
-@role_required(["admin", "professor"])
+@role_required("professor")
 def lista():
     db = SessionLocal()
 
@@ -166,16 +167,21 @@ def lista():
         per_page = 10  # número de registros por página
 
         # Conta o total
-        total = db.query(Usuario).count()
+        # Filtra só os usuários criados pelo usuário logado
+        total = db.query(Usuario).filter(
+            Usuario.criado_por == current_user.id
+        ).count()
 
         # Faz a consulta paginada
         cadastros = (
             db.query(Usuario)
+            .filter(Usuario.criado_por == current_user.id)
             .order_by(Usuario.id.desc())
             .offset((page - 1) * per_page)
             .limit(per_page)
             .all()
         )
+
 
         total_pages = (total + per_page - 1) // per_page  # cálculo simples de total de páginas
 

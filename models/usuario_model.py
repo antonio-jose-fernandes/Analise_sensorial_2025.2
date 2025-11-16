@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Date
+from sqlalchemy import Boolean, Column, Integer, String, Date, ForeignKey
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship
 from models.conexao import Base, engine  # Certifique-se de que a conexão com o banco está correta
@@ -17,6 +17,8 @@ class Usuario(Base, UserMixin):
     senha = Column(String(255)) # Aumentei o tamanho
     tipo = Column(String(20))  # Pode ser "aluno" ou "professor"
     ativo = Column(String(10), default="Ativo")  # Mudando para String com valores "Ativo" ou "Inativo"
+    criado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    criador = relationship("Usuario", remote_side=[id])
     analises_responsavel = relationship("Analise", back_populates="responsavel")
     analises = relationship(
         "Analise",
@@ -24,7 +26,7 @@ class Usuario(Base, UserMixin):
         back_populates="participantes"
     )
 
-    def __init__(self, nome, email, telefone, data_nascimento, login, senha, tipo, ativo="Ativo"):
+    def __init__(self, nome, email, telefone, data_nascimento, login, senha, tipo, ativo="Ativo", criado_por=None):
         self.nome = nome
         self.email = email
         self.telefone = telefone
@@ -33,3 +35,4 @@ class Usuario(Base, UserMixin):
         self.senha = senha
         self.tipo = tipo
         self.ativo = ativo
+        self.criado_por = criado_por
