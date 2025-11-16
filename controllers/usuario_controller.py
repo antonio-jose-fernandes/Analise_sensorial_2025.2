@@ -197,9 +197,18 @@ def lista():
 
 # Rota para exibir o formulário de edição
 @app.route("/usuario/cadastro/inserir/editar/<int:id>", methods=["GET"])
+@login_required
+@role_required("professor")
 def editar(id):
     db = SessionLocal()
     cadastro = db.query(Usuario).filter(Usuario.id == id).first()
+    
+    # 🔒 Verifica se existe e se pertence ao usuário logado
+    if not cadastro or cadastro.criado_por != current_user.id:
+        db.close()
+        flash("Você não tem permissão para editar este usuário.", "danger")
+        return redirect(url_for('lista'))
+
     db.close()
     return render_template("usuario/edit_usuario.html", cadastro=cadastro)
 
@@ -209,6 +218,13 @@ def editar(id):
 def update(id):
     db = SessionLocal()
     cadastro = db.query(Usuario).filter(Usuario.id == id).first()
+
+    # Impede atualização caso o usuário logado não seja o criador
+    if not cadastro or cadastro.criado_por != current_user.id:
+        db.close()
+        flash("Você não tem permissão para atualizar este usuário.", "danger")
+        return redirect(url_for('lista'))
+
 
     if cadastro:
         cadastro.nome = request.form['nome']
@@ -270,9 +286,16 @@ def update(id):
 
 # Rota para excluir um cadastro
 @app.route("/cadastro/excluir/<int:id>", methods=["GET"])
+@login_required
 def excluir(id):
     db = SessionLocal()
     usuario = db.query(Usuario).filter(Usuario.id == id).first()
+
+    # Verificação de permissão
+    if not usuario or usuario.criado_por != current_user.id:
+        db.close()
+        flash("Você não tem permissão para excluir este usuário.", "danger")
+        return redirect(url_for('lista'))
 
     if usuario:
         db.delete(usuario)
